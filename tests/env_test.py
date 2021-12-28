@@ -35,5 +35,6 @@ if __name__=="__main__":
                 obs, rew, done, info = env.step(actn)
                 print("done: ", done)
                 print("rew: ", rew)
+                print("grab", info["grab"])
                 env.render()
 
