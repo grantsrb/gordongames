@@ -4,7 +4,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 from gordongames.envs.ggames import Discrete
 from gordongames.envs.ggames.controllers import *
-from gordongames.envs.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON
+from gordongames.envs.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
 import numpy as np
 
 try:
@@ -106,17 +106,18 @@ class GordonGame(gym.Env):
             int(grab)
         )
         player = self.controller.register.player
-        info["player_grab"] = str(self.get_other_obj(player, grab))
+        info["grab"] = self.get_other_obj_idx(player, grab)
         if self.step_count > self.max_steps: done = True
         elif self.step_count == self.max_steps and rew == 0:
             rew = self.controller.max_punishment
             done = True
         return self.last_obs, rew, done, info
 
-    def get_other_obj(self, obj, grab):
+    def get_other_obj_idx(self, obj, grab):
         """
-        Finds and returns the first game object that is not the argued
-        object and is located at the location of the argued object. 
+        Finds and returns an int representing the first game object
+        that is not the argued object and is located at the locations
+        of the argued object. 
 
         Args:
             obj: GameObject
@@ -125,27 +126,29 @@ class GordonGame(gym.Env):
         Returns:
             other_obj: GameObject or None
                 one of the other objects located at this location.
-                The priority goes by type:
-                    Item
-                    Player
-                    Target
-                    Pile
-                    Button
+                The priority goes by type, see `priority`
         """
-        if not grab: return None
+        # Langpractice depends on this order
+        priority = [
+            PILE,
+            BUTTON,
+            ITEM,
+            PLAYER,
+            TARG,
+        ]
+        if not grab: return 0
         reg = self.controller.register.coord_register
         objs = {*reg[obj.coord]}
-        if len(objs) == 1: return None
+        if len(objs) == 1: return 0
         objs.remove(obj)
-        order = [ITEM, PLAYER, TARG, PILE, BUTTON]
-        memo = {o: set() for o in order}
+        memo = {o: set() for o in priority}
         # Sort objects
         for o in objs:
             memo[o.type].add(o)
         # return single object by priority
-        for o in order:
-            if len(memo[o]) > 0: return memo[o].pop()
-        return None
+        for i,o in enumerate(priority):
+            if len(memo[o]) > 0: return i+1
+        return 0
 
     def reset(self, n_targs=None):
         self.controller.reset(n_targs=n_targs)
