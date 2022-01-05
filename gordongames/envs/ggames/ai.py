@@ -48,13 +48,14 @@ def find_empty_space_along_row(register, seed_coord):
     row, seed_col = seed_coord
     try_col = seed_col
     count = -1
-    while not register.is_empty((row,try_col)):
+    while not register.is_empty((row,try_col)) and count < 100:
         count+=1
         half = count//2
         if count % 2 == 0: try_col = seed_col + half
         else: try_col = seed_col - half
     coord = (row,try_col)
-    assert grid.col_inbounds(try_col) and register.is_empty(coord)
+    if not (grid.col_inbounds(try_col) and register.is_empty(coord)):
+        return None
     return coord
 
 def get_direction(coord0, coord1):
@@ -206,6 +207,12 @@ def cluster_match(contr):
             register=register,
             seed_coord=seed_coord
         )
+        # Fail safe in case agent has filled entire row
+        # This really shouldn't happen
+        if goal_coord is None:
+            goal_coord = register.button.coord
+            if player.coord == goal_coord: grab = True
+            print("Somehow goal coord is None, this shouldn't happen")
     direction = get_direction(player.coord, goal_coord)
     return direction, grab
 
