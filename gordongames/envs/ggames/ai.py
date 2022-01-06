@@ -47,8 +47,9 @@ def find_empty_space_along_row(register, seed_coord):
     grid = register.grid
     row, seed_col = seed_coord
     try_col = seed_col
+    max_cols = register.grid.pixel_shape[1]
     count = -1
-    while not register.is_empty((row,try_col)) and count < 100:
+    while not register.is_empty((row,try_col)) and count < max_cols:
         count+=1
         half = count//2
         if count % 2 == 0: try_col = seed_col + half
@@ -212,7 +213,9 @@ def cluster_match(contr):
         if goal_coord is None:
             goal_coord = register.button.coord
             if player.coord == goal_coord: grab = True
-            print("Somehow goal coord is None, this shouldn't happen")
+            print("Goal coord is None, for seed_coord:", seed_coord)
+            print("Item Count:", register.n_items)
+            print("Targ Count:", register.n_targs)
     direction = get_direction(player.coord, goal_coord)
     return direction, grab
 
