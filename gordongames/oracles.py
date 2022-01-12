@@ -47,7 +47,6 @@ class GordonOracle(Oracle):
             self.brain = gg.envs.ggames.ai.rev_cluster_match
         else:
             raise NotImplemented
-        print("brain:", type(self.brain))
 
     def __call__(self, env, *args, **kwargs):
         """
