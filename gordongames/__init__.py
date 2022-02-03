@@ -18,10 +18,18 @@ register(
     entry_point='gordongames.envs:UnevenLineMatch',
 )
 register(
+    id='gordongames-v4',
+    entry_point='gordongames.envs:NutsInCan',
+)
+register(
     id='gordongames-v5',
     entry_point='gordongames.envs:ReverseClusterMatch',
 )
 register(
     id='gordongames-v6',
     entry_point='gordongames.envs:ClusterClusterMatch',
+)
+register(
+    id='gordongames-v7',
+    entry_point='gordongames.envs:BriefPresentation',
 )

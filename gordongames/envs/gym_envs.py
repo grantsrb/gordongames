@@ -5,6 +5,7 @@ from gym.utils import seeding
 from gordongames.envs.ggames import Discrete
 from gordongames.envs.ggames.controllers import *
 from gordongames.envs.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
+from gordongames.envs.ggames.utils import find_empty_space_along_row
 import numpy as np
 
 try:
@@ -63,13 +64,25 @@ class GordonGame(gym.Env):
         raise NotImplemented
 
     def _toggle_grab(self):
+        """
+        Toggles the grab state of the player. If the task is either the
+        brief presentation or nuts in can task, the grabbing is
+        restricted until the initial animations have finished.
+        """
         grab = not self.is_grabbing
         coord = self.controller.register.player.coord
         if self.is_grabbing:
             self.is_grabbing = False
-        # we know is_grabbing is false here
+        # we know is_grabbing is currently false and there is an object
+        # under the player
         elif not self.controller.register.is_empty(coord):
             self.is_grabbing = True
+        # Restrict grabbing if experiencing initial animations in
+        # BriefPresentation or NutsInCan tasks.
+        if type(self.controller)==BriefPresentationController and\
+                self.controller.register.display_targs:
+            self.is_grabbing = False
+            grab = False
         return grab
 
     def step(self, action):
@@ -117,7 +130,8 @@ class GordonGame(gym.Env):
         """
         Finds and returns an int representing the first game object
         that is not the argued object and is located at the locations
-        of the argued object. 
+        of the argued object. The priority of objects is detailed
+        by the priority list.
 
         Args:
             obj: GameObject
@@ -126,16 +140,13 @@ class GordonGame(gym.Env):
         Returns:
             other_obj: GameObject or None
                 one of the other objects located at this location.
-                The priority goes by type, see `priority`
+                The priority goes by type, see `priority`. a return
+                of 0 means the player is either not grabbing or there
+                are no items to grab
         """
         # Langpractice depends on this order
-        priority = [
-            PILE,
-            BUTTON,
-            ITEM,
-            PLAYER,
-            TARG,
-        ]
+        keys = sorted(list(PRIORITY2TYPE.keys()))
+        priority = [ PRIORITY2TYPE[k] for k in keys ]
         if not grab: return 0
         reg = self.controller.register.coord_register
         objs = {*reg[obj.coord]}
@@ -146,11 +157,11 @@ class GordonGame(gym.Env):
         for o in objs:
             memo[o.type].add(o)
         # return single object by priority
-        for i,o in enumerate(priority):
-            if len(memo[o]) > 0: return i+1
+        for o in priority:
+            if len(memo[o]) > 0: return TYPE2PRIORITY[o]
         return 0
 
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, *args, **kwargs):
         self.controller.reset(n_targs=n_targs)
         self.max_steps = (self.controller.n_targs+1)*self.max_step_base
         self.is_grabbing = False
@@ -299,3 +310,148 @@ class ClusterClusterMatch(GordonGame):
         )
         self.controller.reset()
 
+class BriefPresentation(GordonGame):
+    """
+    Creates a gym game in which the user attempts to place the same
+    number of items on the grid as the number of target objects.
+    The target objects are randomly placed and the agent is supposed
+    to place the same number of items aligned along a single row. The
+    agent's movement is restricted for the first DISPLAY_COUNT frames.
+    The targets are removed from the agent's visual display after the
+    DISPLAY_COUNT frames and the agent has to perform the counting task
+    from memory.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
+    """
+    def set_controller(self):
+        self.controller = BriefPresentationController(
+            grid_size=self.grid_size,
+            pixel_density=self.pixel_density,
+            harsh=self.harsh,
+            targ_range=self.targ_range
+        )
+        self.controller.reset()
+
+class NutsInCan(GordonGame):
+    """
+    Creates a gym version of Peter Gordon's Nuts-In-A-Can game.
+
+    This class creates a game in which the environment initially flashes
+    the targets one by one until all targets are flashed. At the end
+    of the flashing, a center piece appears (to indicate that the
+    flashing stage is over). The agent must then grab the pile the same
+    number of times as there are targets (each of which was flashed only
+    briefly at the beginning of the game).
+
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
+    Once the agent believes the number of items is equal to the number
+    of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
+    targets.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
+    """
+    def set_controller(self):
+        self.controller = NutsInCanController(
+            grid_size=self.grid_size,
+            pixel_density=self.pixel_density,
+            harsh=self.harsh,
+            targ_range=self.targ_range
+        )
+        self.controller.reset()
+
+    def step(self, action):
+        """
+        Args:
+            action: int
+                the action should be an int of either a direction or
+                a grab command
+                    0: null action
+                    1: move up one unit
+                    2: move right one unit
+                    3: move down one unit
+                    4: move left one unit
+                    5: grab/drop object
+        Returns:
+            last_obs: ndarray
+                the observation
+            rew: float
+                the reward
+            done: bool
+                if true, the episode has ended
+            info: dict
+                whatever information the game contains
+        """
+        self.step_count += 1
+
+        direction = STAY
+        grab = 0
+        if action < 5:
+            direction = action
+            grab = 0 # We always handle grabs here
+        elif not self.controller.register.display_targs:
+            coord = self.controller.register.player.coord
+            if not self.controller.register.is_empty(coord):
+                grab = 1
+
+        # Check if player grabbed the pile
+        grabbed_type = self.get_other_obj_idx(
+            self.controller.register.player,
+            grab
+        )
+        # Other option is if it's an item, but this will only happen
+        # when the agent grabs one that has been placed by the env.
+        if grabbed_type == TYPE2PRIORITY[PILE]:
+            self.place_item()
+            direction = STAY
+            grab = 0
+        elif grabbed_type == TYPE2PRIORITY[BUTTON]:
+            direction = STAY
+            grab = 1
+
+        self.last_obs,rew,done,info = self.controller.step(
+            direction,
+            grab
+        )
+        player = self.controller.register.player
+        reg = self.controller.register
+        if self.step_count > self.max_steps: done = True
+        elif self.step_count == self.max_steps and rew == 0:
+            rew = self.controller.max_punishment
+            done = True
+        elif reg.n_items >= 2*reg.n_targs:
+            rew = self.controller.max_punishment
+            done = True
+        info["grab"] = done or grab or grabbed_type==TYPE2PRIORITY[PILE]
+        return self.last_obs, rew, done, info
+
+    def place_item(self):
+        """
+        Creates and places an item along a row.
+        """
+        player = self.controller.register.player
+        middle = self.controller.register.grid.middle_row
+        row = 2
+        coord = None
+        while row < middle and coord is None:
+            coord = find_empty_space_along_row(
+                self.controller.register,
+                (row, player.coord[1])
+            )
+            row += 1
+        if coord is None: return
+        self.controller.register.make_object(
+            obj_type=ITEM,
+            coord=coord
+        )

@@ -1,5 +1,5 @@
 import numpy as np
-from gordongames.envs.ggames.utils import nearest_obj, euc_distance, get_unaligned_items, get_aligned_items, get_rows_and_cols, get_row_and_col_counts, get_max_row
+from gordongames.envs.ggames.utils import nearest_obj, euc_distance, get_unaligned_items, get_aligned_items, get_rows_and_cols, get_row_and_col_counts, get_max_row, find_empty_space_along_row
 from gordongames.envs.ggames.constants import *
 
 def get_even_line_goal_coord(player: object,
@@ -31,33 +31,6 @@ def get_even_line_goal_coord(player: object,
     if len(aligned_items) > 0:
         goal_row = next(iter(aligned_items)).coord[0]
     return (goal_row, goal_targ.coord[1])
-
-def find_empty_space_along_row(register, seed_coord):
-    """
-    Finds the nearest playable empty space along the row of the seed
-    coordinate.
-
-    Args:
-        register: Register
-        seed_coord: tuple of ints (row, col) in grid units
-    Returns:
-        coord:
-            the nearest empty space along the seed row
-    """
-    grid = register.grid
-    row, seed_col = seed_coord
-    try_col = seed_col
-    max_cols = register.grid.pixel_shape[1]
-    count = -1
-    while not register.is_empty((row,try_col)) and count < max_cols:
-        count+=1
-        half = count//2
-        if count % 2 == 0: try_col = seed_col + half
-        else: try_col = seed_col - half
-    coord = (row,try_col)
-    if not (grid.col_inbounds(try_col) and register.is_empty(coord)):
-        return None
-    return coord
 
 def get_direction(coord0, coord1):
     """
@@ -217,6 +190,46 @@ def cluster_match(contr):
             print("Item Count:", register.n_items)
             print("Targ Count:", register.n_targs)
     direction = get_direction(player.coord, goal_coord)
+    return direction, grab
+
+def brief_display(contr):
+    """
+    Same as cluster_match but issues stay order if display is still
+    visible and the agent is on top of a pile or button.
+    """
+    reg = contr.register
+    if reg.display_targs and reg.player.coord == reg.pile.coord:
+        return STAY, 0
+    else:
+        return cluster_match(contr)
+
+def nuts_in_can(contr):
+    """
+    Takes a register and finds the optimal movement and grab action
+    for the state of the register in the nuts in a can game.
+
+    Args:
+        contr: Controller
+    Returns:
+        direction: int
+            a directional movement
+        grab: int
+            whether or not to grab
+    """
+    reg = contr.register
+    player = reg.player
+    items = reg.items
+    n_targs = reg.n_targs
+
+    if reg.display_targs and reg.player.coord == reg.pile.coord:
+        return STAY, 0
+
+    if reg.n_items < n_targs:
+        direction = get_direction(player.coord, reg.pile.coord)
+        grab = player.coord == reg.pile.coord
+    else:
+        direction = get_direction(player.coord, reg.button.coord)
+        grab = player.coord==reg.button.coord
     return direction, grab
 
 def rev_cluster_match(contr):

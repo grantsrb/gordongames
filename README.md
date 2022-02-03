@@ -60,8 +60,8 @@ Use `gym.make('gordongames-v3')` to create the Uneven Line Match game. The agent
     pixel_density = 1
     targ_range = (1,10)
 
-#### Environment v4 Nuts-In-Can (Not yet implemented)
-Use `gym.make('gordongames-v4')` to create the Nuts-In-Can game. The agent watches a number of target objects get placed into a pile. The agent must then remove the correct number of objects. These are the default options for the game (see Game Details to understand what each variable does):
+#### Environment v4 Nuts-In-Can
+Use `gym.make('gordongames-v4')` to create the Nuts-In-Can game. The agent initially watches a number of target objects get breifly flashed, one-by-one. These targets are randomly distributed about the target area. After the initial flash, each target is no longer visible. After all targets are flashed, the agent must then grab the pile the same number of times as there are targets. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
@@ -81,6 +81,14 @@ Use `gym.make('gordongames-v6')` to create the Cluster Cluster Match game. The t
     pixel_density = 1
     targ_range = (1,10)
 
+#### Environment v7 Brief Display
+Use `gym.make('gordongames-v6')` to create the Brief Display game. This is the same as the Cluster Match variant except that the targets are only displayed for the first few frames of the game. The agent must then match the number of randomly distributed target objects from memory. 
+
+These are the default options for the game (see Game Details to understand what each variable does):
+
+    grid_size = [33,33]
+    pixel_density = 1
+    targ_range = (1,10)
 
 ## Game Details
 Each game consists of a randomly intitialized grid with various objects distributed on the grid depending on the game type. The goal is for the agent to first complete some task and then press the end button located in the upper right corner of the grid. Episodes last until the agent presses the end button. The agent can move left, up, right, down, or stay still. The agent also has the ability to interact with objects via the grab action. Grab only acts on objects in the same square as the agent. If the object is an "item", the agent carries the item to wherever it moves on that step. If the object is a "pile", a new item is created and carried with the agent for that step. The ending button is pressed using the grab action. The reward is only granted at the end of each episode if the task was completed successfully.
@@ -111,17 +119,23 @@ The agent receives a +1 reward if there exists an item for each target. All item
 ##### Environment v6
 The agent receives a +1 reward if there exists an item for each target.
 
+##### Environment v7
+The agent receives a +1 reward if there exists a single item for each target. The agent must align the items along a single row.
+
 #### Game Options
 
-- _grid_size_ - An row,col coordinate denoting the number of units on the grid (height, width).
-- _pixel_density_ - Number of numpy pixels within a single grid unit.
-- _targ_range_ - A range of possible initial target object counts for each game (inclusive). Must be less than `grid_size`. 
+- `grid_size` - An row,col coordinate denoting the number of units on the grid (height, width).
+- `pixel_density` - Number of numpy pixels within a single grid unit.
+- `targ_range` - A range of possible initial target object counts for each game (inclusive). Must be less than `grid_size`. 
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 
     env = gym.snake('gordongames-v0')
     env.targ_range = (1,5)
     observation = env.reset()
+    ...
+    # You can specify the number of targets directly at reset
+    observation = env.reset( n_targs=5 )
 
 
 #### Environment Parameter Examples

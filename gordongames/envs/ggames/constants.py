@@ -3,6 +3,7 @@ TARG = "targ"
 PILE = "pile"
 ITEM = "item"
 DIVIDER = "divider"
+SIGNAL = "signal"
 BUTTON = "button"
 DEFAULT = "default"
 
@@ -12,7 +13,8 @@ OBJECT_TYPES = {
     PILE: PILE,
     ITEM: ITEM,
     DIVIDER: DIVIDER,
-    BUTTON: BUTTON
+    BUTTON: BUTTON,
+    SIGNAL: SIGNAL,
 }
 
 STAY = 0
@@ -20,6 +22,7 @@ UP = 1
 RIGHT = 2
 DOWN = 3
 LEFT = 4
+GRAB = 5
 
 DIRECTIONS = {
     STAY: STAY,
@@ -56,6 +59,7 @@ COLORS = {
     DIVIDER: -.3,
     BUTTON: -.1,
     DEFAULT: 0,
+    SIGNAL: -.163
 }
 
 """
@@ -74,4 +78,26 @@ EVENTS = {
     STEP: STEP,
     BUTTON_PRESS: BUTTON_PRESS,
     FULL: FULL,
+}
+
+# Determines the number of steps in which the target display is shown
+# for the brief presentation task.
+DISPLAY_STEPS = 5
+
+
+PRIORITY2TYPE = {
+    1:PILE,
+    2:BUTTON,
+    3:ITEM,
+    4:PLAYER,
+    5:TARG,
+    6:SIGNAL,
+}
+TYPE2PRIORITY = {
+    PILE:1,
+    BUTTON:2,
+    ITEM:3,
+    PLAYER:4,
+    TARG:5,
+    SIGNAL:6,
 }

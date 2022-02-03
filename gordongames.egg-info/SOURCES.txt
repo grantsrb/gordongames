@@ -1,7 +1,0 @@
-README.md
-setup.py
-gordongames.egg-info/PKG-INFO
-gordongames.egg-info/SOURCES.txt
-gordongames.egg-info/dependency_links.txt
-gordongames.egg-info/requires.txt
-gordongames.egg-info/top_level.txt

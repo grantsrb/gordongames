@@ -207,3 +207,30 @@ def euc_distance(coord1, coord2):
     """
     return np.linalg.norm(np.asarray(coord1) - np.asarray(coord2))
 
+def find_empty_space_along_row(register, seed_coord):
+    """
+    Finds the nearest playable empty space along the row of the seed
+    coordinate.
+
+    Args:
+        register: Register
+        seed_coord: tuple of ints (row, col) in grid units
+    Returns:
+        coord:
+            the nearest empty space along the seed row
+    """
+    grid = register.grid
+    row, seed_col = seed_coord
+    try_col = seed_col
+    max_cols = 2*register.grid.shape[1]
+    count = -1
+    while not register.is_empty((row,try_col)) and count < max_cols:
+        count+=1
+        half = count//2
+        if count % 2 == 0: try_col = seed_col + half
+        else: try_col = seed_col - half
+    coord = (row,try_col)
+    if not (grid.col_inbounds(try_col) and register.is_empty(coord)):
+        return None
+    return coord
+

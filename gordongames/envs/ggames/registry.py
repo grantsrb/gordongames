@@ -1,7 +1,7 @@
 from gordongames.envs.ggames.grid import Grid
 import math
 import numpy as np
-from gordongames.envs.ggames.constants import PLAYER, TARG, PILE, ITEM, DIVIDER, BUTTON, BUTTON_PRESS, OBJECT_TYPES, STAY, UP, RIGHT, DOWN, LEFT, DIRECTIONS, COLORS, EVENTS, STEP, FULL, DEFAULT
+from gordongames.envs.ggames.constants import *
 
 class GameObject:
     """
@@ -41,6 +41,10 @@ class GameObject:
     @property
     def color(self):
         return self._color
+
+    @color.setter
+    def color(self, new_color):
+        self._color = new_color
 
     def __str__(self):
         return self.type
@@ -118,6 +122,8 @@ class Register:
         self.coord_register[(0,0)] = set(self.obj_register)
         self.button_event_registry = set()
         self.full_grid_event_registry = set()
+        self.display_targs = True
+        self.invsbl_list = []
 
     @property
     def n_targs(self):
@@ -159,7 +165,8 @@ class Register:
                 if int, changes the number of targets to match the
                 argued value. targs are deleted randomly.
         """
-        self.delete_items()
+        self.display_targs = True
+        self.delete_items(incl_signals=True)
         if n_targs is not None: self.initialize_targs(n_targs)
         self.grid.reset() # makes a fresh grid
         self.draw_register()
@@ -474,13 +481,21 @@ class Register:
         elif game_object == self.pile: del self.pile
         else: del game_object
 
-    def delete_items(self):
+    def delete_items(self, incl_targs=False, incl_signals=True):
         """
         Deletes all items from the registers.
+
+        Args:
+            incl_targs: bool
+                if true, targets are also deleted.
+            incl_signals: bool
+                if true, signals are also deleted.
         """
         reg = {*self.obj_register}
         for obj in reg:
-            if obj.type == ITEM: self.delete_obj(obj)
+            d = obj.type == ITEM or (incl_targs and obj.type == TARG)
+            if d or (incl_signals and obj.type == SIGNAL):
+                self.delete_obj(obj)
 
     def handle_grab(self, player):
         """
@@ -515,6 +530,24 @@ class Register:
                 self.raise_button_event()
                 return BUTTON_PRESS
         return STEP
+
+    def make_signal(self, coord=None):
+        """
+        Creates a signal object
+
+        Args:
+            coord: tuple of ints (row,col) or None
+                optional coordinate for the signal
+        """
+        if coord is None:
+            grid = self.grid
+            row = int(3*grid.shape[0]/4)
+            col = grid.shape[1]//2
+            coord = (row,col)
+        self.make_object(
+            obj_type=SIGNAL,
+            coord=coord
+        )
 
     def make_object(self, obj_type: str, coord: tuple):
         """
@@ -640,7 +673,8 @@ class Register:
                 if len(self.coord_register[coord]) > 0:
                     color = 0
                     for obj in self.coord_register[coord]:
-                        color += obj.color
+                        if self.display_targs or obj.type != TARG:
+                            color += obj.color
                         obj.prev_coord = tuple(obj.coord)
                     self.grid.draw(coord=coord, color=color)
 
@@ -661,13 +695,25 @@ class Register:
                     -obj.color,
                     add_color=True
                 )
-                # Add new value
-                self.grid_draw(
-                    obj.coord,
-                    obj.color,
-                    add_color=True
-                )
+                if self.display_targs or obj.type!=TARG:
+                    # Add new value
+                    self.grid_draw(
+                        obj.coord,
+                        obj.color,
+                        add_color=True
+                    )
                 obj.prev_coord = obj.coord
+
+    def hide_targs(self):
+        """
+        This function is used to hide the targets all at once. This
+        function sets the `self.display_targs` member to False which
+        prevents the targets from getting drawn in the register draw
+        functions. To draw the targets again, simply set
+        `self.display_targs` to True.
+        """
+        self.display_targs = False
+        self.draw_register()
 
     def rand_pile_button_player(self):
         """
@@ -800,8 +846,8 @@ class Register:
         """
         Intialization function for the Cluster Match game B.
 
-        The agent must match the number of target objects without
-        aligning them.
+        The agent must match the number of target objects that are
+        randomly distributed about the grid.
         """
         self.rand_pile_button_player() 
         self.rand_targ_placement()
