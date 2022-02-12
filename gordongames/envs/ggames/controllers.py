@@ -97,7 +97,6 @@ class Controller:
             1: grab item. item will follow player to whichever square
               they move to.
         """
-        event = self.register.step(direction, grab)
         info = {
             "is_harsh": self.harsh,
             "n_targs": self.n_targs,
@@ -108,6 +107,7 @@ class Controller:
                 min_row=0
             ))
         }
+        event = self.register.step(direction, grab)
         done = False
         rew = 0
         if event == BUTTON_PRESS:
@@ -491,7 +491,6 @@ class BriefPresentationController(ClusterMatchController):
             self.register.hide_targs()
         if self.n_steps < DISPLAY_STEPS:
             grab = 0
-        event = self.register.step(direction, grab)
 
         info = {
             "is_harsh": self.harsh,
@@ -503,6 +502,8 @@ class BriefPresentationController(ClusterMatchController):
                 min_row=0
             ))
         }
+        event = self.register.step(direction, grab)
+
         done = False
         rew = 0
         if event == BUTTON_PRESS:
@@ -550,7 +551,7 @@ class NutsInCanController(EvenLineMatchController):
         # for first frame. invis_targs is a set
         self.register.cluster_match()
         self.invis_targs = self.register.targs
-        self.targ = self.invis_targs.pop()
+        self.targ = None
         for targ in self.invis_targs:
             targ.color = COLORS[DEFAULT]
         self.flashed_targs = []
@@ -586,14 +587,16 @@ class NutsInCanController(EvenLineMatchController):
               they move to.
         """
         self.n_steps += 1
-        if len(self.invis_targs) > 0:
+        if self.targ is None:
+            self.targ = self.invis_targs.pop()
+            self.targ.color = COLORS[TARG]
+        elif len(self.invis_targs) > 0:
             self.targ.color = COLORS[DEFAULT]
             self.flashed_targs.append(self.targ)
             self.targ = self.invis_targs.pop()
             self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.register.display_targs:
             self.end_animation()
-        event = self.register.step(direction, grab)
         info = {
             "is_harsh": self.harsh,
             "n_targs": self.n_targs,
@@ -604,8 +607,9 @@ class NutsInCanController(EvenLineMatchController):
                 min_row=0
             ))
         }
-        if self.n_steps <= self.n_targs:
-            info["n_items"] = self.n_steps
+        event = self.register.step(direction, grab)
+        if self.n_steps <= self.n_targs+1:
+            info["n_items"] = self.n_steps-1
         done = False
         rew = 0
         if event == BUTTON_PRESS:
