@@ -434,6 +434,7 @@ class NutsInCan(GordonGame):
             rew = self.controller.max_punishment
             done = True
         info["grab"] = done or grab or grabbed_type==TYPE2PRIORITY[PILE]
+        if grabbed_type==TYPE2PRIORITY[PILE]: info["n_items"] -= 1
         return self.last_obs, rew, done, info
 
     def place_item(self):
