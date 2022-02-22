@@ -105,7 +105,8 @@ class Controller:
                 items=self.register.items,
                 targs=self.register.targs,
                 min_row=0
-            ))
+            )),
+            "disp_targs":int(self.register.display_targs)
         }
         event = self.register.step(direction, grab)
         done = False
@@ -486,12 +487,6 @@ class BriefPresentationController(ClusterMatchController):
               they move to.
         """
         self.n_steps += 1
-        if self.n_steps >= DISPLAY_STEPS and self.register.display_targs:
-            self.register.make_signal()
-            self.register.hide_targs()
-        if self.n_steps < DISPLAY_STEPS:
-            grab = 0
-
         info = {
             "is_harsh": self.harsh,
             "n_targs": self.n_targs,
@@ -500,8 +495,16 @@ class BriefPresentationController(ClusterMatchController):
                 items=self.register.items,
                 targs=self.register.targs,
                 min_row=0
-            ))
+            )),
+            "disp_targs":int(self.register.display_targs)
         }
+        if self.n_steps > self.n_targs and self.register.display_targs:
+            self.register.make_signal()
+            self.register.hide_targs()
+        if self.n_steps <= self.n_targs+1:
+            grab = 0
+            info["n_items"] = self.n_steps-1
+
         event = self.register.step(direction, grab)
 
         done = False
@@ -587,6 +590,17 @@ class NutsInCanController(EvenLineMatchController):
               they move to.
         """
         self.n_steps += 1
+        info = {
+            "is_harsh": self.harsh,
+            "n_targs": self.n_targs,
+            "n_items": self.register.n_items,
+            "n_aligned": len(get_aligned_items(
+                items=self.register.items,
+                targs=self.register.targs,
+                min_row=0
+            )),
+            "disp_targs":int(self.register.display_targs)
+        }
         if self.targ is None:
             self.targ = self.invis_targs.pop()
             self.targ.color = COLORS[TARG]
@@ -597,18 +611,8 @@ class NutsInCanController(EvenLineMatchController):
             self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.register.display_targs:
             self.end_animation()
-        info = {
-            "is_harsh": self.harsh,
-            "n_targs": self.n_targs,
-            "n_items": self.register.n_items,
-            "n_aligned": len(get_aligned_items(
-                items=self.register.items,
-                targs=self.register.targs,
-                min_row=0
-            ))
-        }
         event = self.register.step(direction, grab)
-        if self.n_steps <= self.n_targs+1:
+        if self.n_steps <= self.n_targs + 1:
             info["n_items"] = self.n_steps-1
         done = False
         rew = 0

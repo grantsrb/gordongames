@@ -80,10 +80,6 @@ EVENTS = {
     FULL: FULL,
 }
 
-# Determines the number of steps in which the target display is shown
-# for the brief presentation task.
-DISPLAY_STEPS = 5
-
 
 PRIORITY2TYPE = {
     1:PILE,
