@@ -11,6 +11,7 @@ if __name__=="__main__":
     }
     env_types = [
         "gordongames-v4",
+        "gordongames-v7",
         "gordongames-v0",
         "gordongames-v1",
     ]
