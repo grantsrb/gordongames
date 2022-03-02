@@ -59,10 +59,9 @@ class GordonOracle(Oracle):
                 the environment
         """
         (direction, grab) = self.brain(env.controller)
-        if grab == self.is_grabbing:
+        if grab == env.is_grabbing:
             return direction
         elif self.brain == gg.envs.ggames.ai.nuts_in_can:
             return gg.envs.ggames.constants.GRAB
         else:
-            self.is_grabbing = grab
             return gg.envs.ggames.constants.GRAB

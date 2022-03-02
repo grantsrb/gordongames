@@ -4,9 +4,10 @@ from gordongames.envs.ggames.ai import even_line_match, cluster_match
 from gordongames.envs.ggames.constants import DIRECTION2STR
 from gordongames.oracles import GordonOracle
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 if __name__=="__main__":
-    render = False
+    render = True
     kwargs = {
         "targ_range": (1,9),
         "grid_size": (11,11),
@@ -15,13 +16,13 @@ if __name__=="__main__":
     }
     env_names = [
         #"gordongames-v0",
-        #"gordongames-v1",
+        "gordongames-v1",
         #"gordongames-v2",
         #"gordongames-v3",
-        "gordongames-v4",
+        #"gordongames-v4",
         #"gordongames-v5",
         #"gordongames-v6",
-        "gordongames-v7",
+        #"gordongames-v7",
     ]
     for env_name in env_names:
         print("Testing Env:", env_name)
@@ -49,7 +50,9 @@ if __name__=="__main__":
                     print("rew: ", rew)
                     print("grab", info["grab"])
                     print("n_targs:", info["n_targs"])
-                    env.render()
+                    plt.imshow(obs)
+                    plt.show()
+                    #env.render()
         print("Targ distr")
         print("n_targs, count")
         for k,v in targ_distr.items():
