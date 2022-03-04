@@ -531,6 +531,19 @@ class Register:
                 return BUTTON_PRESS
         return STEP
 
+    def get_signal_coord(self):
+        """
+        Returns the center square of the lower half of the grid.
+
+        Returns:
+            coord: tuple of ints
+                the coordinate in which the signal object goes.
+        """
+        grid = self.grid
+        row = int(3*grid.shape[0]/4)
+        col = grid.shape[1]//2
+        return (row,col)
+
     def make_signal(self, coord=None):
         """
         Creates a signal object
@@ -540,10 +553,7 @@ class Register:
                 optional coordinate for the signal
         """
         if coord is None:
-            grid = self.grid
-            row = int(3*grid.shape[0]/4)
-            col = grid.shape[1]//2
-            coord = (row,col)
+            coord = self.get_signal_coord()
         self.make_object(
             obj_type=SIGNAL,
             coord=coord
@@ -725,11 +735,17 @@ class Register:
         self.move_object(self.button, (0, int(cols[1])))
         self.move_object(self.player, (0, int(cols[2])))
 
-    def rand_targ_placement(self):
+    def rand_targ_placement(self, reserved_coords=set()):
         """
         Places the targets randomly on the grid.
+
+        Args:
+            reserved_coords: set of coords
+                if you wish any spaces to be avoided when placing the
+                target objects, you can specify these coordinates in
+                the reserved_coords set
         """
-        coords = {(0,0)}
+        coords = {(0,0), *reserved_coords}
         if self.grid.is_divided: low = self.grid.middle_row+1
         else: low = 0
         high = self.grid.shape[0]
@@ -842,15 +858,21 @@ class Register:
         self.even_targ_spacing()
         self.draw_register()
 
-    def cluster_match(self):
+    def cluster_match(self, reserved_coords=set()):
         """
         Intialization function for the Cluster Match game B.
 
         The agent must match the number of target objects that are
         randomly distributed about the grid.
+
+        Args:
+            reserved_coords: set of coords
+                if you wish any spaces to be avoided when placing the
+                target objects, you can specify these coordinates in
+                the reserved_coords set
         """
         self.rand_pile_button_player() 
-        self.rand_targ_placement()
+        self.rand_targ_placement(reserved_coords=reserved_coords)
         self.draw_register()
 
     def orthogonal_line_match(self):

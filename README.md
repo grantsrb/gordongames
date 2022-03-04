@@ -82,7 +82,16 @@ Use `gym.make('gordongames-v6')` to create the Cluster Cluster Match game. The t
     targ_range = (1,10)
 
 #### Environment v7 Brief Display
-Use `gym.make('gordongames-v6')` to create the Brief Display game. This is the same as the Cluster Match variant except that the targets are only displayed for the first few frames of the game. The agent must then match the number of randomly distributed target objects from memory. 
+Use `gym.make('gordongames-v7')` to create the Brief Display game. This is the same as the Cluster Match variant except that the targets are only displayed for the first few frames of the game. The agent must then match the number of randomly distributed target objects from memory. 
+
+These are the default options for the game (see Game Details to understand what each variable does):
+
+    grid_size = [33,33]
+    pixel_density = 1
+    targ_range = (1,10)
+
+#### Environment v8 Visible Nuts-In-Can
+Use `gym.make('gordongames-v8')` to create the Visible Nuts-in-Can game. This is the same as the Nuts-In-Can variant except that the targets are displayed for the entire episode. 
 
 These are the default options for the game (see Game Details to understand what each variable does):
 
@@ -121,6 +130,9 @@ The agent receives a +1 reward if there exists an item for each target.
 
 ##### Environment v7
 The agent receives a +1 reward if there exists a single item for each target. The agent must align the items along a single row.
+
+##### Environment v8
+The agent receives a +1 reward if the agent removes the exact number of items placed in the pile.
 
 #### Game Options
 

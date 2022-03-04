@@ -198,7 +198,7 @@ def brief_display(contr):
     visible and the agent is on top of a pile or button.
     """
     reg = contr.register
-    if reg.display_targs and reg.player.coord == reg.pile.coord:
+    if contr.is_animating and reg.player.coord == reg.pile.coord:
         return STAY, 0
     else:
         return cluster_match(contr)
@@ -221,7 +221,7 @@ def nuts_in_can(contr):
     items = reg.items
     n_targs = reg.n_targs
 
-    if reg.display_targs and reg.player.coord == reg.pile.coord:
+    if contr.is_animating and reg.player.coord == reg.pile.coord:
         return STAY, 0
 
     if reg.n_items < n_targs:

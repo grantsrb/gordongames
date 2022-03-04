@@ -7,7 +7,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 if __name__=="__main__":
-    render = True
+    render = False
     kwargs = {
         "targ_range": (1,9),
         "grid_size": (11,11),
@@ -23,6 +23,7 @@ if __name__=="__main__":
         #"gordongames-v5",
         #"gordongames-v6",
         #"gordongames-v7",
+        #"gordongames-v8",
     ]
     for env_name in env_names:
         print("Testing Env:", env_name)
@@ -50,9 +51,9 @@ if __name__=="__main__":
                     print("rew: ", rew)
                     print("grab", info["grab"])
                     print("n_targs:", info["n_targs"])
-                    plt.imshow(obs)
-                    plt.show()
-                    #env.render()
+                    #plt.imshow(obs)
+                    #plt.show()
+                    env.render()
         print("Targ distr")
         print("n_targs, count")
         for k,v in targ_distr.items():

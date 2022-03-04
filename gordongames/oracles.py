@@ -49,6 +49,8 @@ class GordonOracle(Oracle):
             self.brain = gg.envs.ggames.ai.rev_cluster_match
         elif self.env_type == "gordongames-v7":
             self.brain = gg.envs.ggames.ai.brief_display
+        elif self.env_type == "gordongames-v8":
+            self.brain = gg.envs.ggames.ai.nuts_in_can
         else:
             raise NotImplemented
 

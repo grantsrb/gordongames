@@ -455,6 +455,7 @@ class BriefPresentationController(ClusterMatchController):
             n_targs = np.random.randint(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
+        self.is_animating = True
         # randomizes object placement on grid
         self.register.cluster_match()
         return self.grid.grid
@@ -501,6 +502,7 @@ class BriefPresentationController(ClusterMatchController):
         if self.n_steps > self.n_targs and self.register.display_targs:
             self.register.make_signal()
             self.register.hide_targs()
+            self.is_animating = False
         if self.n_steps <= self.n_targs+1:
             grab = 0
             info["n_items"] = self.n_steps-1
@@ -549,6 +551,7 @@ class NutsInCanController(EvenLineMatchController):
             n_targs = np.random.randint(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
+        self.is_animating = True
 
         # randomize object placement on grid, only display one target
         # for first frame. invis_targs is a set
@@ -648,3 +651,134 @@ class NutsInCanController(EvenLineMatchController):
         for targ in self.flashed_targs:
             targ.color = COLORS[TARG]
         self.register.hide_targs()
+        self.is_animating = False
+
+class VisNutsController(EvenLineMatchController):
+    """
+    This class creates a game in which the environment has an initial
+    animation in which the targets are flashed one by one until all
+    targets are visible. At the end of the animation, a center piece
+    appears (as an indication that the flashing stage is over).
+    The agent must then grab the pile the same
+    number of times as there are targets.
+
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
+    Once the agent believes the number of items is equal to the number
+    of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
+    targets.
+    """
+    def reset(self, n_targs=None):
+        """
+        This function should be called everytime the environment starts
+        a new episode.
+        """
+        self.n_steps = 0
+        if n_targs is None:
+            low, high = self.targ_range
+            n_targs = np.random.randint(low, high+1)
+        # wipes items from grid and makes/deletes targs
+        self.register.reset(n_targs)
+        self.is_animating = True
+
+        # randomize object placement on grid, only display one target
+        # for first frame. invis_targs is a set
+        self.register.cluster_match({self.register.get_signal_coord()})
+        self.invis_targs = self.register.targs
+        self.targ = None
+        for targ in self.invis_targs:
+            targ.color = COLORS[DEFAULT]
+        self.flashed_targs = []
+        self.register.draw_register()
+
+        return self.grid.grid
+
+    def step(self, direction: int, grab: int):
+        """
+        Step takes a movement and a grabbing action. The function
+        moves the player and any items in the following way.
+
+        This function determines if the targets should be displayed
+        anymore based on the total number of steps taken so far.
+
+        Args:
+          direction: int [0, 1, 2, 3, 4]
+            Check DIRECTIONS to ensure these values haven't changed
+                0: no movement
+                1: move up (lower row unit)
+                2: move right (higher column unit)
+                3: move down (higher row unit)
+                4: move left (lower column unit)
+          grab: int [0,1]
+            grab is an action to enable the agent to carry items around
+            the grid. when a player is on top of an item, they can grab
+            the item and carry it with them as they move. If the player
+            is on top of a pile, a new item is created and carried with
+            them to the next square.
+        
+            0: quit grabbing item
+            1: grab item. item will follow player to whichever square
+              they move to.
+        """
+        self.n_steps += 1
+        info = {
+            "is_harsh": self.harsh,
+            "n_targs": self.n_targs,
+            "n_items": self.register.n_items,
+            "n_aligned": len(get_aligned_items(
+                items=self.register.items,
+                targs=self.register.targs,
+                min_row=0
+            )),
+            "disp_targs":int(self.register.display_targs)
+        }
+        if self.targ is None:
+            self.targ = self.invis_targs.pop()
+            self.targ.color = COLORS[TARG]
+        elif len(self.invis_targs) > 0:
+            self.flashed_targs.append(self.targ)
+            self.targ = self.invis_targs.pop()
+            self.targ.color = COLORS[TARG]
+        elif len(self.invis_targs)==0 and self.register.display_targs:
+            self.end_animation()
+        event = self.register.step(direction, grab)
+        if self.n_steps <= self.n_targs + 1:
+            info["n_items"] = self.n_steps-1
+        done = False
+        rew = 0
+        if event == BUTTON_PRESS:
+            rew = self.calculate_reward(harsh=self.harsh)
+            done = True
+        elif event == FULL:
+            done = True
+            rew = -1
+        elif event == STEP:
+            done = False
+            rew = 0
+        return self.grid.grid, rew, done, info
+
+    def calculate_reward(self, harsh=False):
+        """
+        Determines the reward for the agent.
+
+        Args:
+            harsh: bool
+                currently there is no difference for the harsh flag on
+                the reward calculation.
+        """
+        return 2*(self.register.n_items == self.n_targs) - 1
+
+    def end_animation(self):
+        """
+        This is called to clean up the initial flashing sequence and
+        to display an object that indicates the player should begin
+        its counting.
+        """
+        self.register.make_signal()
+        for targ in self.flashed_targs:
+            targ.color = COLORS[TARG]
+        self.is_animating = False
+

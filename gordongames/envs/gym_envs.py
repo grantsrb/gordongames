@@ -80,7 +80,7 @@ class GordonGame(gym.Env):
         # Restrict grabbing if experiencing initial animations in
         # BriefPresentation or NutsInCan tasks.
         if type(self.controller)==BriefPresentationController and\
-                self.controller.register.display_targs:
+                self.controller.is_animating:
             self.is_grabbing = False
             grab = False
         return grab
@@ -400,7 +400,7 @@ class NutsInCan(GordonGame):
         if action < 5:
             direction = action
             grab = 0 # We always handle grabs here
-        elif not self.controller.register.display_targs:
+        elif not self.controller.is_animating:
             coord = self.controller.register.player.coord
             if not self.controller.register.is_empty(coord):
                 grab = 1
@@ -456,3 +456,39 @@ class NutsInCan(GordonGame):
             obj_type=ITEM,
             coord=coord
         )
+
+class VisNuts(NutsInCan):
+    """
+    Creates a gym version of Peter Gordon's Nuts-In-A-Can game in which
+    the nuts remain visible.
+
+    This class creates a game in which the environment has an initial
+    animation in which the targets are flashed one by one until all
+    targets are visible. At the end of the animation, a center piece
+    appears (as an indication that the flashing stage is over).
+    The agent must then grab the pile the same
+    number of times as there are targets.
+
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
+    Once the agent believes the number of items is equal to the number
+    of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
+    targets.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
+    """
+    def set_controller(self):
+        self.controller = VisNutsController(
+            grid_size=self.grid_size,
+            pixel_density=self.pixel_density,
+            harsh=self.harsh,
+            targ_range=self.targ_range
+        )
+        self.controller.reset()

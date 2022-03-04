@@ -34,3 +34,7 @@ register(
     id='gordongames-v7',
     entry_point='gordongames.envs:BriefPresentation',
 )
+register(
+    id='gordongames-v8',
+    entry_point='gordongames.envs:VisNuts',
+)
