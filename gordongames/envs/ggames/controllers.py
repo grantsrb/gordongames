@@ -37,6 +37,7 @@ class Controller:
         self._targ_range = targ_range
         self._grid_size = grid_size
         self._pixel_density = pixel_density
+        self.is_animating = False
 
     @property
     def targ_range(self):
@@ -106,7 +107,8 @@ class Controller:
                 targs=self.register.targs,
                 min_row=0
             )),
-            "disp_targs":int(self.register.display_targs)
+            "disp_targs":int(self.register.display_targs),
+            "is_animating":int(self.is_animating),
         }
         event = self.register.step(direction, grab)
         done = False
@@ -497,7 +499,8 @@ class BriefPresentationController(ClusterMatchController):
                 targs=self.register.targs,
                 min_row=0
             )),
-            "disp_targs":int(self.register.display_targs)
+            "disp_targs":int(self.register.display_targs),
+            "is_animating":int(self.is_animating),
         }
         if self.n_steps > self.n_targs and self.register.display_targs:
             self.register.make_signal()
@@ -602,7 +605,8 @@ class NutsInCanController(EvenLineMatchController):
                 targs=self.register.targs,
                 min_row=0
             )),
-            "disp_targs":int(self.register.display_targs)
+            "disp_targs":int(self.register.display_targs),
+            "is_animating":int(self.is_animating),
         }
         if self.targ is None:
             self.targ = self.invis_targs.pop()
@@ -733,7 +737,8 @@ class VisNutsController(EvenLineMatchController):
                 targs=self.register.targs,
                 min_row=0
             )),
-            "disp_targs":int(self.register.display_targs)
+            "disp_targs":int(self.register.display_targs),
+            "is_animating":int(self.is_animating),
         }
         if self.targ is None:
             self.targ = self.invis_targs.pop()
