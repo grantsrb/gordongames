@@ -1,5 +1,6 @@
 from gordongames.envs.ggames.grid import Grid
 import math
+import time
 import numpy as np
 from gordongames.envs.ggames.constants import *
 
@@ -124,6 +125,7 @@ class Register:
         self.full_grid_event_registry = set()
         self.display_targs = True
         self.invsbl_list = []
+        self.rand = np.random.default_rng(int(time.time()))
 
     @property
     def n_targs(self):
@@ -166,7 +168,7 @@ class Register:
                 argued value. targs are deleted randomly.
         """
         self.display_targs = True
-        self.delete_items(incl_signals=True)
+        self.delete_items(incl_targs=True, incl_signals=True)
         if n_targs is not None: self.initialize_targs(n_targs)
         self.grid.reset() # makes a fresh grid
         self.draw_register()
@@ -730,7 +732,7 @@ class Register:
         Places the pile, button, and player randomly along the top
         row of the grid.
         """
-        cols = np.random.permutation(self.grid.shape[1])
+        cols = self.rand.permutation(self.grid.shape[1])
         self.move_object(self.pile, (0, int(cols[0])))
         self.move_object(self.button, (0, int(cols[1])))
         self.move_object(self.player, (0, int(cols[2])))
@@ -753,8 +755,8 @@ class Register:
         for targ in self.targs:
             coord = (0,0)
             while not self.is_empty(coord) or coord in coords:
-                row = np.random.randint(low, high)
-                col = np.random.randint(0, self.grid.shape[1])
+                row = self.rand.integers(low, high)
+                col = self.rand.integers(0, self.grid.shape[1])
                 coord = (row, col)
             coords.add(coord)
             self.move_object(targ, coord=coord)
@@ -765,7 +767,7 @@ class Register:
         along a random row (below the divider) beginning at a random
         column.
         """
-        row = np.random.randint(
+        row = self.rand.integers(
             self.grid.middle_row+1,
             self.grid.shape[0]
         )
@@ -773,11 +775,11 @@ class Register:
         max_spacing = avail_col_space//max(self.n_targs-1, 1)
         space_between = 0
         if max_spacing > 0:
-            space_between = np.random.randint(0,max_spacing)
+            space_between = self.rand.integers(0,max_spacing)
         start_col = 0
         taken_space = self.n_targs + space_between*(self.n_targs-1)
         space_left = self.grid.shape[1]-taken_space
-        start_col = np.random.randint(0,space_left+1)
+        start_col = self.rand.integers(0,space_left+1)
         for i,targ in enumerate(self._targs):
             col = start_col + i*(space_between+1)
             coord = (row, col)
@@ -793,7 +795,7 @@ class Register:
                 the maximum spacing that can occur between two targets.
                 (inclusive)
         """
-        row = np.random.randint(
+        row = self.rand.integers(
             self.grid.middle_row+1,
             self.grid.shape[0]
         )
@@ -804,11 +806,11 @@ class Register:
                 spacings.append(0)
             else:
                 lim = min(max_spacing+1, avail_col_space)
-                spacing = np.random.randint(0,lim)
+                spacing = self.rand.integers(0,lim)
                 spacings.append(spacing)
                 avail_col_space -= spacing
-        spacings = np.random.permutation(spacings)
-        start_col = np.random.randint(0,avail_col_space+1)
+        spacings = self.rand.permutation(spacings)
+        start_col = self.rand.integers(0,avail_col_space+1)
 
         for i,targ in enumerate(self._targs):
             if i > 0:
@@ -822,7 +824,7 @@ class Register:
         along a random column (below the divider) beginning at a random
         row.
         """
-        col = np.random.randint(
+        col = self.rand.integers(
             0,
             self.grid.shape[1]
         )
@@ -836,11 +838,11 @@ class Register:
         max_spacing = avail_row_space//max(self.n_targs-1, 1)
         space_between = 0
         if max_spacing > 0:
-            space_between = np.random.randint(0,max_spacing)
+            space_between = self.rand.integers(0,max_spacing)
 
         taken_space = self.n_targs + space_between*(self.n_targs-1)
         space_avail = space-taken_space
-        start_row = start_row + np.random.randint(0,space_avail+1)
+        start_row = start_row + self.rand.integers(0,space_avail+1)
         for i,targ in enumerate(self._targs):
             row = start_row + i*(space_between+1)
             coord = (row, col)

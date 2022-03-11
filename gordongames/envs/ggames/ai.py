@@ -32,7 +32,7 @@ def get_even_line_goal_coord(player: object,
         goal_row = next(iter(aligned_items)).coord[0]
     return (goal_row, goal_targ.coord[1])
 
-def get_direction(coord0, coord1):
+def get_direction(coord0, coord1, rand=None):
     """
     Finds the movement direction from coord0 to coord1.
 
@@ -41,6 +41,8 @@ def get_direction(coord0, coord1):
             the coordinate that we will be moving from
         coord1: tuple (row, col) in grid units
             the coordinate that we will be moving to
+        rand: numpy random number generator
+            if none, defaults to numpy.random
     Returns:
         direction: int [0, 1, 2, 3, 4]
           The direction to move closer to coord1 from coord0.
@@ -51,12 +53,13 @@ def get_direction(coord0, coord1):
               3: move down (higher row unit)
               4: move left (lower column unit)
     """
+    if rand is None: rand = np.random
     start_row, start_col = coord0
     end_row, end_col = coord1
     row_diff = int(end_row - start_row)
     col_diff = int(end_col - start_col)
     if row_diff != 0 and col_diff != 0:
-        if np.random.random() < .5:
+        if rand.random() < .5:
             return DOWN if row_diff > 0 else UP
         else:
             return RIGHT if col_diff > 0 else LEFT
@@ -128,7 +131,11 @@ def even_line_match(contr):
             print("targs")
             print(targs)
 
-    direction = get_direction(player.coord, goal_coord)
+    direction = get_direction(
+        player.coord,
+        goal_coord,
+        register.rand
+    )
     return direction, grab
 
 def cluster_match(contr):
@@ -189,7 +196,11 @@ def cluster_match(contr):
             print("Goal coord is None, for seed_coord:", seed_coord)
             print("Item Count:", register.n_items)
             print("Targ Count:", register.n_targs)
-    direction = get_direction(player.coord, goal_coord)
+    direction = get_direction(
+        player.coord,
+        goal_coord,
+        register.rand
+    )
     return direction, grab
 
 def brief_display(contr):
@@ -225,10 +236,10 @@ def nuts_in_can(contr):
         return STAY, 0
 
     if reg.n_items < n_targs:
-        direction = get_direction(player.coord, reg.pile.coord)
+        direction = get_direction(player.coord,reg.pile.coord,reg.rand)
         grab = player.coord == reg.pile.coord
     else:
-        direction = get_direction(player.coord, reg.button.coord)
+        direction=get_direction(player.coord,reg.button.coord,reg.rand)
         grab = player.coord==reg.button.coord
     return direction, grab
 
@@ -282,6 +293,6 @@ def rev_cluster_match(contr):
     # empty space centered on the pile.
     else:
         goal_coord = register.find_space(register.pile.coord)
-    direction = get_direction(player.coord, goal_coord)
+    direction = get_direction(player.coord, goal_coord, register.rand)
     return direction, grab
 

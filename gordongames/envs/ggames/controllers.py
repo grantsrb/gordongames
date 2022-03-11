@@ -3,6 +3,7 @@ from gordongames.envs.ggames.registry import Register
 from gordongames.envs.ggames.constants import *
 from gordongames.envs.ggames.utils import get_rows_and_cols, get_aligned_items, get_max_row
 import numpy as np
+import time
 
 """
 This file contains each of the game controller classes for each of the
@@ -38,6 +39,7 @@ class Controller:
         self._grid_size = grid_size
         self._pixel_density = pixel_density
         self.is_animating = False
+        self.rand = np.random.default_rng(int(time.time()))
 
     @property
     def targ_range(self):
@@ -169,9 +171,10 @@ class EvenLineMatchController(Controller):
         This function should be called everytime the environment starts
         a new episode.
         """
+        self.register.rand = self.rand
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = np.random.randint(low, high+1)
+            n_targs = self.rand.integers(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         # randomizes object placement on grid
@@ -236,9 +239,10 @@ class ClusterMatchController(EvenLineMatchController):
         This function should be called everytime the environment starts
         a new episode.
         """
+        self.register.rand = self.rand
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = np.random.randint(low, high+1)
+            n_targs = self.rand.integers(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         # randomizes object placement on grid
@@ -405,9 +409,10 @@ class UnevenLineMatchController(EvenLineMatchController):
         This function should be called everytime the environment starts
         a new episode.
         """
+        self.register.rand = self.rand
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = np.random.randint(low, high+1)
+            n_targs = self.rand.integers(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         # randomizes object placement on grid
@@ -427,9 +432,10 @@ class OrthogonalLineMatchController(ClusterMatchController):
         This function should be called everytime the environment starts
         a new episode.
         """
+        self.register.rand = self.rand
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = np.random.randint(low, high+1)
+            n_targs = self.rand.integers(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         # randomizes object placement on grid
@@ -451,10 +457,11 @@ class BriefPresentationController(ClusterMatchController):
         This function should be called everytime the environment starts
         a new episode.
         """
+        self.register.rand = self.rand
         self.n_steps = 0
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = np.random.randint(low, high+1)
+            n_targs = self.rand.integers(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         self.is_animating = True
@@ -502,7 +509,7 @@ class BriefPresentationController(ClusterMatchController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
         }
-        if self.n_steps > self.n_targs and self.register.display_targs:
+        if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal()
             self.register.hide_targs()
             self.is_animating = False
@@ -548,10 +555,11 @@ class NutsInCanController(EvenLineMatchController):
         This function should be called everytime the environment starts
         a new episode.
         """
+        self.register.rand = self.rand
         self.n_steps = 0
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = np.random.randint(low, high+1)
+            n_targs = self.rand.integers(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         self.is_animating = True
@@ -616,7 +624,7 @@ class NutsInCanController(EvenLineMatchController):
             self.flashed_targs.append(self.targ)
             self.targ = self.invis_targs.pop()
             self.targ.color = COLORS[TARG]
-        elif len(self.invis_targs)==0 and self.register.display_targs:
+        elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
         event = self.register.step(direction, grab)
         if self.n_steps <= self.n_targs + 1:
@@ -680,10 +688,11 @@ class VisNutsController(EvenLineMatchController):
         This function should be called everytime the environment starts
         a new episode.
         """
+        self.register.rand = self.rand
         self.n_steps = 0
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = np.random.randint(low, high+1)
+            n_targs = self.rand.integers(low, high+1)
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         self.is_animating = True
@@ -747,7 +756,7 @@ class VisNutsController(EvenLineMatchController):
             self.flashed_targs.append(self.targ)
             self.targ = self.invis_targs.pop()
             self.targ.color = COLORS[TARG]
-        elif len(self.invis_targs)==0 and self.register.display_targs:
+        elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
         event = self.register.step(direction, grab)
         if self.n_steps <= self.n_targs + 1:

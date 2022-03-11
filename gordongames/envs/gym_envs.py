@@ -1,12 +1,11 @@
 import os, subprocess, time, signal
 import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
 from gordongames.envs.ggames import Discrete
 from gordongames.envs.ggames.controllers import *
 from gordongames.envs.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
 from gordongames.envs.ggames.utils import find_empty_space_along_row
 import numpy as np
+import time
 
 try:
     import matplotlib.pyplot as plt
@@ -54,6 +53,7 @@ class GordonGame(gym.Env):
         self.viewer = None
         self.action_space = Discrete(6)
         self.is_grabbing = False
+        self.seed(int(time.time()))
         self.set_controller()
 
     def set_controller(self):
@@ -162,6 +162,7 @@ class GordonGame(gym.Env):
         return 0
 
     def reset(self, n_targs=None, *args, **kwargs):
+        self.controller.rand = self.rand
         self.controller.reset(n_targs=n_targs)
         self.max_steps = (self.controller.n_targs+1)*self.max_step_base
         self.is_grabbing = False
@@ -182,7 +183,11 @@ class GordonGame(gym.Env):
         self.fig.canvas.draw()
 
     def seed(self, x):
-        np.random.seed(x)
+        self.rand = np.random.default_rng(x)
+
+    def set_seed(self, x):
+        self.rand = np.random.default_rng(x)
+        pass
 
 class EvenLineMatch(GordonGame):
     """
@@ -201,6 +206,7 @@ class EvenLineMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
 class ClusterMatch(GordonGame):
@@ -224,6 +230,7 @@ class ClusterMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
 class OrthogonalLineMatch(GordonGame):
@@ -245,6 +252,7 @@ class OrthogonalLineMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
 class UnevenLineMatch(GordonGame):
@@ -264,6 +272,7 @@ class UnevenLineMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
 class ReverseClusterMatch(GordonGame):
@@ -286,6 +295,7 @@ class ReverseClusterMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
 class ClusterClusterMatch(GordonGame):
@@ -308,6 +318,7 @@ class ClusterClusterMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
 class BriefPresentation(GordonGame):
@@ -334,6 +345,7 @@ class BriefPresentation(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
 class NutsInCan(GordonGame):
@@ -369,6 +381,7 @@ class NutsInCan(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
 
     def step(self, action):
@@ -491,4 +504,5 @@ class VisNuts(NutsInCan):
             harsh=self.harsh,
             targ_range=self.targ_range
         )
+        self.controller.rand = self.rand
         self.controller.reset()
