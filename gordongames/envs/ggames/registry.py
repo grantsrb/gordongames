@@ -356,11 +356,10 @@ class Register:
                     return FULL
         return STEP
 
-    def find_space(self, coord):
+    def find_space(self, coord, playable_half=True):
         """
         Searches around the argued coord for a coordinate that is
-        either empty or only contains a player game object. Only
-        spaces that are within the playable boundaries are considered.
+        either empty or only contains a player game object.
 
         The order of the search is the pixels connected to the argued
         coordinate starting in the upper left connected pixel moving
@@ -375,6 +374,11 @@ class Register:
             coord: tuple in grid units (row, col)
                 this is the root of the breadth first search. It is
                 not included in the search.
+            playable_half: bool
+                if true, the algorithm only considers locations that
+                are in the playable parts the grid. If false, only
+                considers spaces that are in unplayable parts of the
+                grid.
         Returns:
             free_coord: tuple
                 the nearest coordinate that is empty or only contains
@@ -384,7 +388,9 @@ class Register:
             """
             loc: tuple coordinate in grid units (row, col)
             """
-            return self.is_playable(loc) and self.is_empty(loc)
+            if playable_half:
+                return self.is_playable(loc) and self.is_empty(loc)
+            return self.is_targ_space(loc) and self.is_empty(loc)
         row,col = coord
         layer = 0
         while layer < max(*self.grid.shape):
@@ -535,7 +541,10 @@ class Register:
 
     def get_signal_coord(self):
         """
-        Returns the center square of the lower half of the grid.
+        Returns the center square of the lower half of the grid unless
+        it is occupied. If occupied this function searches one unit
+        left, up, right, then down for a free space. This repeats if
+        no free spaces are found.
 
         Returns:
             coord: tuple of ints
@@ -544,7 +553,10 @@ class Register:
         grid = self.grid
         row = int(3*grid.shape[0]/4)
         col = grid.shape[1]//2
-        return (row,col)
+        coord = (row,col)
+        if not self.is_empty(coord):
+            coord = self.find_space(coord, playable_half=False)
+        return coord
 
     def make_signal(self, coord=None):
         """

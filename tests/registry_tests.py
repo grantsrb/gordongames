@@ -1,7 +1,7 @@
-from grid import Grid
-from registry import Register
+from gordongames.envs.ggames.grid import Grid
+from gordongames.envs.ggames.registry import Register
 import matplotlib.pyplot as plt
-from constants import PLAYER, TARG, PILE, ITEM, DIVIDER, BUTTON, OBJECT_TYPES, STAY, UP, RIGHT, DOWN, LEFT, DIRECTIONS, COLORS, EVENTS, STEP, BUTTON, FULL, DEFAULT
+from gordongames.envs.ggames.constants import *
 import numpy as np
 
 if __name__ == "__main__":

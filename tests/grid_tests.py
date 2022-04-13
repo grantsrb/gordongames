@@ -1,6 +1,6 @@
-from grid import Grid
+from gordongames.envs.ggames.grid import Grid
 import matplotlib.pyplot as plt
-from constants import PLAYER, TARG, PILE, ITEM, DIVIDER, BUTTON, OBJECT_TYPES, STAY, UP, RIGHT, DOWN, LEFT, DIRECTIONS, COLORS, EVENTS, STEP, BUTTON, FULL, DEFAULT
+from gordongames.envs.ggames.constants import PLAYER, TARG, PILE, ITEM, DIVIDER, BUTTON, OBJECT_TYPES, STAY, UP, RIGHT, DOWN, LEFT, DIRECTIONS, COLORS, EVENTS, STEP, BUTTON, FULL, DEFAULT
 import numpy as np
 
 if __name__=="__main__":
@@ -10,6 +10,7 @@ if __name__=="__main__":
     assert grid.pixel_shape == (31,31)
     assert grid.density == 1
     assert grid.is_divided == False
+    print(grid.middle_row)
     assert grid.middle_row == 16
     assert grid.units2pixels((10,15)) == (10,15)
     assert grid.pixels2units((10,15)) == (10,15)

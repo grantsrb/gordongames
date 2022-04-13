@@ -10,20 +10,20 @@ import time
 if __name__=="__main__":
     render = True
     kwargs = {
-        "targ_range": (5,9),
-        "grid_size": (15,15),
+        "targ_range": (4,4),
+        "grid_size": (9,6),
         "pixel_density": 3,
-        "seed": 12345,
+        "seed": 123456,
         "harsh": True,
     }
     env_names = [
-        #"gordongames-v0",
-        #"gordongames-v1",
+        "gordongames-v0",
+        "gordongames-v1",
         #"gordongames-v2",
-        #"gordongames-v3",
+        "gordongames-v3",
         "gordongames-v4",
-        #"gordongames-v5",
-        #"gordongames-v6",
+        "gordongames-v5",
+        "gordongames-v6",
         "gordongames-v7",
         "gordongames-v8",
     ]
@@ -34,7 +34,7 @@ if __name__=="__main__":
         env.seed(kwargs["seed"])
         oracle = GordonOracle(env_name)
         targ_distr = {i: 0 for i in range(1,10)}
-        rng = range(4)
+        rng = range(20)
         if not render: rng = tqdm(rng)
         for i in rng:
             obs = env.reset()
@@ -59,9 +59,9 @@ if __name__=="__main__":
                     print("max luminance:", obs.max())
                     print("min luminance:", obs.min())
                     print()
-                    plt.imshow(prev_obs)
-                    plt.show()
-                    #env.render()
+                    #plt.imshow(prev_obs)
+                    #plt.show()
+                    env.render()
         print("Targ distr")
         print("n_targs, count")
         for k,v in targ_distr.items():

@@ -87,6 +87,9 @@ def even_line_match(contr):
     player = register.player
     items = register.items
     targs = register.targs
+    if contr.is_animating and player.coord == register.pile.coord:
+        return STAY, 0
+
     # find items that are out of place
     lost_items = get_unaligned_items(items, targs)
     aligned_items = items-lost_items # set math
@@ -156,6 +159,9 @@ def cluster_match(contr):
     player = register.player
     items = register.items
     n_targs = register.n_targs
+
+    if contr.is_animating and player.coord == register.pile.coord:
+        return STAY, 0
 
     min_row = 2
     max_row, n_aligned = get_max_row(
@@ -260,6 +266,9 @@ def rev_cluster_match(contr):
     player = register.player
     items = register.items
     targs = register.targs
+
+    if contr.is_animating and player.coord == register.pile.coord:
+        return STAY, 0
     
     # used later to determine if all items are aligned
     aligned_items = get_aligned_items(items, targs, min_row=0)
