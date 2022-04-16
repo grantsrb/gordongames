@@ -1,6 +1,6 @@
 import numpy as np
-from gordongames.envs.ggames.utils import nearest_obj, euc_distance, get_unaligned_items, get_aligned_items, get_rows_and_cols, get_row_and_col_counts, get_max_row, find_empty_space_along_row
-from gordongames.envs.ggames.constants import *
+from gordoncont.ggames.utils import nearest_obj, euc_distance, get_unaligned_items, get_aligned_items, get_rows_and_cols, get_row_and_col_counts, get_max_row, find_empty_space_along_row
+from gordoncont.ggames.constants import *
 
 def get_even_line_goal_coord(player: object,
                              aligned_items: set,
@@ -44,31 +44,14 @@ def get_direction(coord0, coord1, rand=None):
         rand: numpy random number generator
             if none, defaults to numpy.random
     Returns:
-        direction: int [0, 1, 2, 3, 4]
-          The direction to move closer to coord1 from coord0.
-          Check DIRECTIONS to ensure these values haven't changed
-              0: no movement
-              1: move up (lower row unit)
-              2: move right (higher column unit)
-              3: move down (higher row unit)
-              4: move left (lower column unit)
+        coord: tuple of ints (row,col)
     """
     if rand is None: rand = np.random
     start_row, start_col = coord0
     end_row, end_col = coord1
     row_diff = int(end_row - start_row)
     col_diff = int(end_col - start_col)
-    if row_diff != 0 and col_diff != 0:
-        if rand.random() < .5:
-            return DOWN if row_diff > 0 else UP
-        else:
-            return RIGHT if col_diff > 0 else LEFT
-    elif row_diff != 0:
-        return DOWN if row_diff > 0 else UP
-    elif col_diff != 0:
-        return RIGHT if col_diff > 0 else LEFT
-    else:
-        return STAY
+    return (row_diff, col_diff)
 
 def even_line_match(contr):
     """
@@ -78,8 +61,8 @@ def even_line_match(contr):
     Args:
         contr: Controller
     Returns:
-        direction: int
-            a directional movement
+        xycoord: tuple of floats ranging from [-1,1] (lateral,vertical)
+            the movement coordinates
         grab: int
             whether or not to grab
     """
@@ -88,7 +71,9 @@ def even_line_match(contr):
     items = register.items
     targs = register.targs
     if contr.is_animating and player.coord == register.pile.coord:
-        return STAY, 0
+        if register.egocentric:
+            return (0,0), 0
+        return register.coord2xy(player.coord), 0
 
     # find items that are out of place
     lost_items = get_unaligned_items(items, targs)
@@ -107,9 +92,8 @@ def even_line_match(contr):
     else: grab = False
 
     # determine where to move next
-    if not grab: goal_coord = grab_obj.coord
-    # If we're on top of the button, simply issue a STAY order
-    elif grab_obj == register.button: return STAY, grab
+    if not grab or grab_obj == register.button:
+        goal_coord = grab_obj.coord
     elif len(items) > len(targs):
         goal_coord = register.pile.coord
     # Need to find nearest target that has not been completed and
@@ -134,12 +118,13 @@ def even_line_match(contr):
             print("targs")
             print(targs)
 
-    direction = get_direction(
-        player.coord,
-        goal_coord,
-        register.rand
-    )
-    return direction, grab
+    if register.egocentric:
+        goal_coord = get_direction(
+            player.coord,
+            goal_coord,
+            register.rand
+        )
+    return register.coord2xy(goal_coord), grab
 
 def cluster_match(contr):
     """
@@ -161,7 +146,9 @@ def cluster_match(contr):
     n_targs = register.n_targs
 
     if contr.is_animating and player.coord == register.pile.coord:
-        return STAY, 0
+        if register.egocentric:
+            return (0,0), 0
+        return register.coord2xy(player.coord), 0
 
     min_row = 2
     max_row, n_aligned = get_max_row(
@@ -184,9 +171,9 @@ def cluster_match(contr):
     if player.coord==grab_obj.coord: grab = True
     else: grab = False
 
-    if not grab:
+    if not grab or grab_obj == register.button:
         goal_coord = grab_obj.coord
-    else: # Either on pile or unaligned object
+    else: # on pile or unaligned object
         goal_row = max_row if max_row is not None else 2
         temp_col = register.grid.shape[1]//2
         seed_coord = (goal_row, player.coord[1])
@@ -202,52 +189,25 @@ def cluster_match(contr):
             print("Goal coord is None, for seed_coord:", seed_coord)
             print("Item Count:", register.n_items)
             print("Targ Count:", register.n_targs)
-    direction = get_direction(
-        player.coord,
-        goal_coord,
-        register.rand
-    )
-    return direction, grab
+    if register.egocentric:
+        goal_coord = get_direction(
+            player.coord,
+            goal_coord,
+            register.rand
+        )
+    return register.coord2xy(goal_coord), grab
 
 def brief_display(contr):
     """
-    Same as cluster_match but issues stay order if display is still
-    visible and the agent is on top of a pile or button.
+    Same as cluster_match
     """
-    reg = contr.register
-    if contr.is_animating and reg.player.coord == reg.pile.coord:
-        return STAY, 0
-    else:
-        return cluster_match(contr)
+    return cluster_match(contr)
 
 def nuts_in_can(contr):
     """
-    Takes a register and finds the optimal movement and grab action
-    for the state of the register in the nuts in a can game.
-
-    Args:
-        contr: Controller
-    Returns:
-        direction: int
-            a directional movement
-        grab: int
-            whether or not to grab
+    Same as cluster_match
     """
-    reg = contr.register
-    player = reg.player
-    items = reg.items
-    n_targs = reg.n_targs
-
-    if contr.is_animating and reg.player.coord == reg.pile.coord:
-        return STAY, 0
-
-    if reg.n_items < n_targs:
-        direction = get_direction(player.coord,reg.pile.coord,reg.rand)
-        grab = player.coord == reg.pile.coord
-    else:
-        direction=get_direction(player.coord,reg.button.coord,reg.rand)
-        grab = player.coord==reg.button.coord
-    return direction, grab
+    return cluster_match(contr)
 
 def rev_cluster_match(contr):
     """
@@ -268,7 +228,9 @@ def rev_cluster_match(contr):
     targs = register.targs
 
     if contr.is_animating and player.coord == register.pile.coord:
-        return STAY, 0
+        if register.egocentric:
+            return (0,0), 0
+        return register.coord2xy(player.coord), 0
     
     # used later to determine if all items are aligned
     aligned_items = get_aligned_items(items, targs, min_row=0)
@@ -293,7 +255,8 @@ def rev_cluster_match(contr):
     # determine where to move next
     if not grab: goal_coord = grab_obj.coord
     # If we're on top of the button, simply issue a STAY order and grab
-    elif grab_obj == register.button: return STAY, grab
+    elif grab_obj == register.button: 
+        return register.coord2xy(player.coord), grab
     elif len(items) > len(targs):
         goal_coord = register.pile.coord
     # Here we know that we have an item in our grasp. if we're in an
@@ -302,6 +265,11 @@ def rev_cluster_match(contr):
     # empty space centered on the pile.
     else:
         goal_coord = register.find_space(register.pile.coord)
-    direction = get_direction(player.coord, goal_coord, register.rand)
-    return direction, grab
+    if register.egocentric:
+        goal_coord = get_direction(
+            player.coord,
+            goal_coord,
+            register.rand
+        )
+    return register.coord2xy(goal_coord), grab
 

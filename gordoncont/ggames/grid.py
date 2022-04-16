@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from gordongames.envs.ggames.constants import PLAYER, TARG, PILE, ITEM, DIVIDER, BUTTON, OBJECT_TYPES, STAY, UP, RIGHT, DOWN, LEFT, DIRECTIONS, COLORS, EVENTS, STEP, BUTTON, FULL, DEFAULT
+from gordoncont.ggames.constants import PLAYER, TARG, PILE, ITEM, DIVIDER, BUTTON, OBJECT_TYPES, STAY, UP, RIGHT, DOWN, LEFT, DIRECTIONS, COLORS, EVENTS, STEP, BUTTON, FULL, DEFAULT
 
 """
 The grid class handles the drawing of objects to the image. It enables
@@ -86,6 +86,10 @@ class Grid:
 
     @property
     def middle_row(self):
+        """
+        This row is not included in the "playable space" when the grid
+        is divided
+        """
         half = self.shape[0]/2
         if self.shape[0] % 2 == 0: return half + 1
         else: return int(half)

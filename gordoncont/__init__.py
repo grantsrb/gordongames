@@ -1,5 +1,6 @@
-import gordongames.oracles
-import gordongames.envs
+import gordoncont.oracles
+import gordoncont.envs
+import gordoncont.ggames
 from gym.envs.registration import register
 
 register(

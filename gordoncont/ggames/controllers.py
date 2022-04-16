@@ -1,7 +1,7 @@
-from gordongames.envs.ggames.grid import Grid
-from gordongames.envs.ggames.registry import Register
-from gordongames.envs.ggames.constants import *
-from gordongames.envs.ggames.utils import get_rows_and_cols, get_aligned_items, get_max_row
+from gordoncont.ggames.grid import Grid
+from gordoncont.ggames.registry import Register
+from gordoncont.ggames.constants import *
+from gordoncont.ggames.utils import get_rows_and_cols, get_aligned_items, get_max_row
 import numpy as np
 import time
 
@@ -65,10 +65,11 @@ class Controller:
     def calculate_reward(self):
         raise NotImplemented
 
-    def step(self, direction: int, grab: int):
+    def step(self, xycoord: tuple, grab: int):
         """
-        Step takes a movement and a grabbing action. The function
-        moves the player and any items in the following way.
+        Step takes a continous x,y coordinate and a grabbing action.
+        This function then moves the player and any items in the
+        following way.
 
         If the player was carrying an object and stepped onto another
         object, the game is handled as follows. While the player
@@ -83,13 +84,11 @@ class Controller:
         right 1, up 2 right 2, up 1 right 2, right 2, etc.
 
         Args:
-          direction: int [0, 1, 2, 3, 4]
-            Check DIRECTIONS to ensure these values haven't changed
-                0: no movement
-                1: move up (lower row unit)
-                2: move right (higher column unit)
-                3: move down (higher row unit)
-                4: move left (lower column unit)
+          xycoord: tuple of floats in the range [-1,1](lateral,vertical)
+            the xycoord is the desired coordinate of the grid centered
+            at the center of the playable space on the grid.
+            coordinates are rounded to the nearest integer when
+            deciding which discrete location goes with the coord
           grab: int [0,1]
             grab is an action to enable the agent to carry items around
             the grid. when a player is on top of an item, they can grab
@@ -121,7 +120,7 @@ class Controller:
             grab = 0
             info["n_items"] = self.n_steps-1
 
-        event = self.register.step(direction, grab)
+        event = self.register.step(xycoord, grab)
 
         done = False
         rew = 0
@@ -458,7 +457,7 @@ class BriefPresentationController(ClusterMatchController):
     targets that were originally displayed along a single row. The
     targets are randomly distributed about the grid.
     """
-    def step(self, direction: int, grab: int):
+    def step(self, xycoord: tuple, grab: int):
         """
         Step takes a movement and a grabbing action. The function
         moves the player and any items in the following way.
@@ -467,13 +466,11 @@ class BriefPresentationController(ClusterMatchController):
         anymore based on the total number of steps taken so far.
 
         Args:
-          direction: int [0, 1, 2, 3, 4]
-            Check DIRECTIONS to ensure these values haven't changed
-                0: no movement
-                1: move up (lower row unit)
-                2: move right (higher column unit)
-                3: move down (higher row unit)
-                4: move left (lower column unit)
+          xycoord: tuple of floats in the range [-1,1](lateral,vertical)
+            the xycoord is the desired coordinate of the grid centered
+            at the center of the playable space on the grid.
+            coordinates are rounded to the nearest integer when
+            deciding which discrete location goes with the coord
           grab: int [0,1]
             grab is an action to enable the agent to carry items around
             the grid. when a player is on top of an item, they can grab
@@ -506,7 +503,7 @@ class BriefPresentationController(ClusterMatchController):
             grab = 0
             info["n_items"] = self.n_steps-1
 
-        event = self.register.step(direction, grab)
+        event = self.register.step(xycoord, grab)
 
         done = False
         rew = 0
@@ -558,7 +555,7 @@ class NutsInCanController(EvenLineMatchController):
 
         return self.grid.grid
 
-    def step(self, direction: int, grab: int):
+    def step(self, xycoord: tuple, grab: int):
         """
         Step takes a movement and a grabbing action. The function
         moves the player and any items in the following way.
@@ -567,13 +564,11 @@ class NutsInCanController(EvenLineMatchController):
         anymore based on the total number of steps taken so far.
 
         Args:
-          direction: int [0, 1, 2, 3, 4]
-            Check DIRECTIONS to ensure these values haven't changed
-                0: no movement
-                1: move up (lower row unit)
-                2: move right (higher column unit)
-                3: move down (higher row unit)
-                4: move left (lower column unit)
+          xycoord: tuple of floats in the range [-1,1](lateral,vertical)
+            the xycoord is the desired coordinate of the grid centered
+            at the center of the playable space on the grid.
+            coordinates are rounded to the nearest integer when
+            deciding which discrete location goes with the coord
           grab: int [0,1]
             grab is an action to enable the agent to carry items around
             the grid. when a player is on top of an item, they can grab
@@ -608,7 +603,7 @@ class NutsInCanController(EvenLineMatchController):
             self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
-        event = self.register.step(direction, grab)
+        event = self.register.step(xycoord, grab)
         if self.n_steps <= self.n_targs + 1:
             info["n_items"] = self.n_steps-1
         done = False
@@ -682,7 +677,7 @@ class VisNutsController(EvenLineMatchController):
         self.register.draw_register()
         return self.grid.grid
 
-    def step(self, direction: int, grab: int):
+    def step(self, xycoord: tuple, grab: int):
         """
         Step takes a movement and a grabbing action. The function
         moves the player and any items in the following way.
@@ -691,13 +686,11 @@ class VisNutsController(EvenLineMatchController):
         anymore based on the total number of steps taken so far.
 
         Args:
-          direction: int [0, 1, 2, 3, 4]
-            Check DIRECTIONS to ensure these values haven't changed
-                0: no movement
-                1: move up (lower row unit)
-                2: move right (higher column unit)
-                3: move down (higher row unit)
-                4: move left (lower column unit)
+          xycoord: tuple of floats in the range [-1,1](lateral,vertical)
+            the xycoord is the desired coordinate of the grid centered
+            at the center of the playable space on the grid.
+            coordinates are rounded to the nearest integer when
+            deciding which discrete location goes with the coord
           grab: int [0,1]
             grab is an action to enable the agent to carry items around
             the grid. when a player is on top of an item, they can grab
@@ -731,7 +724,7 @@ class VisNutsController(EvenLineMatchController):
             self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
-        event = self.register.step(direction, grab)
+        event = self.register.step(xycoord, grab)
         if self.n_steps <= self.n_targs + 1:
             info["n_items"] = self.n_steps-1
         done = False
