@@ -1,6 +1,6 @@
 import os, subprocess, time, signal
 import gym
-from gordoncont.ggames import Discrete
+from gordoncont.ggames import Discrete, Box
 from gordoncont.ggames.controllers import *
 from gordoncont.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
 from gordoncont.ggames.utils import find_empty_space_along_row
@@ -49,9 +49,10 @@ class GordonGame(gym.Env):
         self.targ_range = targ_range
         if type(targ_range) == int:
             self.targ_range = (targ_range,targ_range)
+        self.max_items = self.targ_range[-1]*3
         self.harsh = harsh
         self.viewer = None
-        self.action_space = Discrete(6)
+        self.action_space = Box((3,))
         self.is_grabbing = False
         self.seed(int(time.time()))
         self.set_controller()
@@ -112,6 +113,7 @@ class GordonGame(gym.Env):
         player = self.controller.register.player
         info["grab"] = self.get_other_obj_idx(player, grab)
         if self.step_count > self.max_steps: done = True
+        if info["n_items"] > self.max_items: done = True
         elif self.step_count == self.max_steps and rew == 0:
             rew = self.controller.max_punishment
             done = True

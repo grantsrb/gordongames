@@ -4,38 +4,38 @@ import gordoncont.ggames
 from gym.envs.registration import register
 
 register(
-    id='gordongames-v0',
-    entry_point='gordongames.envs:EvenLineMatch',
+    id='gordoncont-v0',
+    entry_point='gordoncont.envs:EvenLineMatch',
 )
 register(
-    id='gordongames-v1',
-    entry_point='gordongames.envs:ClusterMatch',
+    id='gordoncont-v1',
+    entry_point='gordoncont.envs:ClusterMatch',
 )
 register(
-    id='gordongames-v2',
-    entry_point='gordongames.envs:OrthogonalLineMatch',
+    id='gordoncont-v2',
+    entry_point='gordoncont.envs:OrthogonalLineMatch',
 )
 register(
-    id='gordongames-v3',
-    entry_point='gordongames.envs:UnevenLineMatch',
+    id='gordoncont-v3',
+    entry_point='gordoncont.envs:UnevenLineMatch',
 )
 register(
-    id='gordongames-v4',
-    entry_point='gordongames.envs:NutsInCan',
+    id='gordoncont-v4',
+    entry_point='gordoncont.envs:NutsInCan',
 )
 register(
-    id='gordongames-v5',
-    entry_point='gordongames.envs:ReverseClusterMatch',
+    id='gordoncont-v5',
+    entry_point='gordoncont.envs:ReverseClusterMatch',
 )
 register(
-    id='gordongames-v6',
-    entry_point='gordongames.envs:ClusterClusterMatch',
+    id='gordoncont-v6',
+    entry_point='gordoncont.envs:ClusterClusterMatch',
 )
 register(
-    id='gordongames-v7',
-    entry_point='gordongames.envs:BriefPresentation',
+    id='gordoncont-v7',
+    entry_point='gordoncont.envs:BriefPresentation',
 )
 register(
-    id='gordongames-v8',
-    entry_point='gordongames.envs:VisNuts',
+    id='gordoncont-v8',
+    entry_point='gordoncont.envs:VisNuts',
 )

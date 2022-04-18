@@ -2,7 +2,7 @@ from gordoncont.ggames.grid import Grid
 import math
 import time
 import numpy as np
-from gordongames.envs.ggames.constants import *
+from gordoncont.ggames.constants import *
 
 class GameObject:
     """

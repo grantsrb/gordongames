@@ -186,9 +186,9 @@ def cluster_match(contr):
         if goal_coord is None:
             goal_coord = register.button.coord
             if player.coord == goal_coord: grab = True
-            print("Goal coord is None, for seed_coord:", seed_coord)
-            print("Item Count:", register.n_items)
-            print("Targ Count:", register.n_targs)
+            #print("Goal coord is None, for seed_coord:", seed_coord)
+            #print("Item Count:", register.n_items)
+            #print("Targ Count:", register.n_targs)
     if register.egocentric:
         goal_coord = get_direction(
             player.coord,
