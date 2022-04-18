@@ -234,9 +234,3 @@ def find_empty_space_along_row(register, seed_coord):
         return None
     return coord
 
-def add_coords(coord0, coord1):
-    """
-    Performs a simple vector addition
-    """
-    return (coord0[0]+coord1[0], coord0[1]+coord1[1])
-

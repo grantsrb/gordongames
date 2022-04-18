@@ -1,8 +1,8 @@
-from gordoncont.ggames.grid import Grid
+from gordongames.envs.ggames.grid import Grid
 import math
 import time
 import numpy as np
-from gordoncont.ggames.constants import *
+from gordongames.envs.ggames.constants import *
 
 class GameObject:
     """
@@ -126,8 +126,6 @@ class Register:
         self.display_targs = True
         self.invsbl_list = []
         self.rand = np.random.default_rng(int(time.time()))
-        # Not yet implemented
-        self.egocentric = False
 
     @property
     def n_targs(self):
@@ -262,7 +260,7 @@ class Register:
             self.obj_register.add(targ)
             self.coord_register[targ.coord].add(targ)
 
-    def step(self, xycoord: tuple, grab: int):
+    def step(self, direction: int, grab: int):
         """
         Step takes two actions and moves the player and any items
         appropriately.
@@ -280,11 +278,13 @@ class Register:
         right 1, up 2 right 2, up 1 right 2, right 2, etc.
 
         Args:
-          xycoord: tuple of floats in the range [-1,1](lateral,vertical)
-            the xycoord is the desired coordinate of the grid centered
-            at the center of the playable space on the grid.
-            coordinates are rounded to the nearest integer when
-            deciding which discrete location goes with the coord
+          direction: int [0, 1, 2, 3, 4]
+            Check DIRECTIONS to ensure these values haven't changed
+                0: no movement
+                1: move up (lower row unit)
+                2: move right (higher column unit)
+                3: move down (higher row unit)
+                4: move left (lower column unit)
           grab: int [0,1]
             grab is an action to enable the agent to carry items around
             the grid. when a player is on top of an item, they can grab
@@ -300,7 +300,7 @@ class Register:
         # Either way, the player object's prev_coord will be updated
         # to reflect what its coord variable was before entering the
         # move object function
-        did_move = self.move_player(xycoord)
+        did_move = self.move_player(direction)
 
         if grab == 0:
             # must check for overlapping objects and handle
@@ -593,90 +593,28 @@ class Register:
         self.obj_register.add(obj)
         self.coord_register[coord].add(obj)
 
-    def apply_direction(self, coord: tuple, xycoord: tuple):
+    def apply_direction(self, coord: tuple, direction: int):
         """
         Changes a coord to reflect the applied direction
 
         Args:
-          coord: tuple grid units (row, col)
-            the seed coordinate, this is ignored if using allocentric
-            coordinates
-          xycoord: tuple of floats in the range [-1,1](lateral,vertical)
-            the xycoord is the desired coordinate of the grid centered
-            at the center of the playable space on the grid.
-            coordinates are rounded to the nearest integer when
-            deciding which discrete location goes with the coord
+            coord: tuple grid units (row, col)
+            direction: int
+                the movement direction. see the DIRECTIONS constant
         Returns:
-          new_coord: tuple
-            the updated coordinate
+            new_coord: tuple
+                the updated coordinate
         """
-        # Need to convert from x,y to row,col with the appropriate
-        # dimensions for the current grid
-        new_coord = self.xy2coord(xycoord)
-        if self.egocentric:
-            coord = tuple(coord)
-            new_coord = ( coord[0]+new_coord[0], coord[1]+new_coord[1] )
+        new_coord = tuple(coord)
+        if direction == UP:
+            new_coord = (coord[0]-1, coord[1])
+        elif direction == RIGHT:
+            new_coord = (coord[0], coord[1]+1)
+        elif direction == DOWN:
+            new_coord = (coord[0]+1, coord[1])
+        elif direction == LEFT:
+            new_coord = (coord[0], coord[1]-1)
         return new_coord
-
-    def coord2xy(self, coord):
-        """
-        Converts a unit row,col coordinate ranging from 0 to the
-        maximum size of the playable grid minus 1 to a float xy coordinate
-        ranging from -1 to 1 horizontally and vertically respectively.
-
-        This is the inverse to `xy2coord`
-
-        Args:
-          xycoord: tuple of floats in the range [-1,1] (lateral,vertical)
-            the xycoord is the desired coordinate of the grid centered
-            at the center of the playable space on the grid.
-            coordinates are rounded to the nearest integer when
-            deciding which discrete location goes with the coord
-        Returns:
-            coord: tuple of ints (row, col)
-        """
-        shape = self.grid.shape
-        if self.grid.is_divided:
-            mid = self.grid.middle_row
-            xycoord = (
-                (coord[1]-(shape[1]-1)/2)/((shape[1]-1)/2),
-                (coord[0]-(mid-1)/2)/((mid-1)/2)
-            )
-        else:
-            xycoord = (
-                (coord[1]-(shape[1]-1)/2)/((shape[1]-1)/2),
-                (coord[0]-(shape[0]-1)/2)/((shape[0]-1)/2)
-            )
-        return xycoord
-
-    def xy2coord(self, xycoord):
-        """
-        Converts a float xy coordinate ranging from -1 to 1 horizontally
-        and vertically respectively to a unit row,col coordinate ranging
-        from 0 to the maximum size of the grid minus 1.
-
-        Args:
-          xycoord: tuple of floats in the range [-1,1] (lateral,vertical)
-            the xycoord is the desired coordinate of the grid centered
-            at the center of the playable space on the grid.
-            coordinates are rounded to the nearest integer when
-            deciding which discrete location goes with the coord
-        Returns:
-            coord: tuple of ints (row, col)
-        """
-        shape = self.grid.shape
-        if self.grid.is_divided:
-            mid = self.grid.middle_row
-            coord = (
-                int(round((mid-1)/2+xycoord[1]*(mid-1)/2)),
-                int(round((shape[1]-1)/2+xycoord[0]*(shape[1]-1)/2)),
-            )
-        else:
-            coord = (
-                int(round((shape[0]-1)/2+xycoord[1]*(shape[0]-1)/2)),
-                int(round((shape[1]-1)/2+xycoord[0]*(shape[1]-1)/2)),
-            )
-        return coord
 
     def move_object(self, game_object: GameObject, coord: tuple=None):
         """
@@ -711,29 +649,27 @@ class Register:
             return True
         return False
 
-    def move_player(self, xycoord):
+    def move_player(self, direction):
         """
-        Takes a continuous xycoordinate updates the player's coordinate
-        to the nearest integer unit. Updates are reflected in
+        Takes a direction and updates the player's coordinate to
+        reflect the applied direction. Updates are reflected in
         coord_register and in the player.
 
         If player does not move, this function returns False. This
         includes if the action is STAY and successfully completed.
 
         Args:
-          xycoord: tuple of floats in the range [-1,1](lateral,vertical)
-            the xycoord is the desired coordinate of the grid centered
-            at the center of the playable space on the grid.
-            coordinates are rounded to the nearest integer when
-            deciding which discrete location goes with the coord
+            direction: int
+                the movement direction. See DIRECTIONS constant.
         Returns:
-          did_move: bool
-            if true, the move was legal and object was moved.
-            If false, the move was either STAY and the game_object
-            is updated. Or the move was illegal and the
-            game_object does not change
+            did_move: bool
+                if true, the move was legal and object was moved.
+                If false, the move was either STAY and the game_object
+                is updated. Or the move was illegal and the
+                game_object does not change
         """
-        coord = self.apply_direction(self.player.coord, xycoord)
+        direction = direction % len(DIRECTIONS)
+        coord = self.apply_direction(self.player.coord, direction)
         if self.grid.is_playable(coord):
             return self.move_object(self.player, coord)
         else:

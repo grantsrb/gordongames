@@ -1,7 +1,7 @@
-# Gordon Games Continuous
+# Gordon Games
 
 ## Description
-gordongames continuous (gordoncont) is a continuous gym environment for recreating computational versions of games proposed in Peter Gordon's paper [_Numerical Cognition Without Words: Evidence from Amazonia_](https://www.science.org/doi/10.1126/science.1094492). 
+gordongames is a gym environment for recreating computational versions of games proposed in Peter Gordon's paper [_Numerical Cognition Without Words: Evidence from Amazonia_](https://www.science.org/doi/10.1126/science.1094492). 
 
 ## Dependencies
 - python3
@@ -14,8 +14,8 @@ gordongames continuous (gordoncont) is a continuous gym environment for recreati
 1. Clone this repository
 2. Navigate to the cloned repository
 3. Run command `$ pip install -e ./`
-4. add `import gordoncont` to the top of your python script
-5. make one of the envs with the folowing: `env = gym.make("gordoncont-<version here>")`
+4. add `import gordongames` to the top of your python script
+5. make one of the envs with the folowing: `env = gym.make("gordongames-<version here>")`
 
 ## Rendering
 A common error about matplotlib using `agg` can be fixed by including the following lines in your scripts before calling `.render()`:
@@ -29,60 +29,60 @@ If you are experiencing trouble using the `render()` function while using jupyte
 
 before calling `render()`.
 
-## Using gordoncont
-After installation, you can use gordoncont by making one of the gym environments. See the paper [_Numerical Cognition Without Words: Evidence from Amazonia_](https://www.science.org/doi/10.1126/science.1094492) for more details about each game.
+## Using gordongames
+After installation, you can use gordongames by making one of the gym environments. See the paper [_Numerical Cognition Without Words: Evidence from Amazonia_](https://www.science.org/doi/10.1126/science.1094492) for more details about each game.
 
 #### Environment v0 Even Line Match
-Use `gym.make('gordoncont-v0')` to create the Line Match game. The agent must match the number of target objects by aligning them within the target columns. Targets are evenly spaced. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v0')` to create the Line Match game. The agent must match the number of target objects by aligning them within the target columns. Targets are evenly spaced. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v1 Cluster Match
-Use `gym.make('gordoncont-v1')` to create the Cluster Line Match game. The agent must match the number target objects, but the target objects are randomly distributed and the agent must align the items in a row. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v1')` to create the Cluster Line Match game. The agent must match the number target objects, but the target objects are randomly distributed and the agent must align the items in a row. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v2 Orthogonal Line Match
-Use `gym.make('gordoncont-v2')` to create the Orthogonal Line Match game. The agent must match the number of target objects, but the target objects are aligned vertically whereas the agent must align the items along a single row. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v2')` to create the Orthogonal Line Match game. The agent must match the number of target objects, but the target objects are aligned vertically whereas the agent must align the items along a single row. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v3 Uneven Line Match
-Use `gym.make('gordoncont-v3')` to create the Uneven Line Match game. The agent must match the target objects by aligning them along each respective target column. The targets are unevenly spaced. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v3')` to create the Uneven Line Match game. The agent must match the target objects by aligning them along each respective target column. The targets are unevenly spaced. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v4 Nuts-In-Can
-Use `gym.make('gordoncont-v4')` to create the Nuts-In-Can game. The agent initially watches a number of target objects get breifly flashed, one-by-one. These targets are randomly distributed about the target area. After the initial flash, each target is no longer visible. After all targets are flashed, the agent must then grab the pile the same number of times as there are targets. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v4')` to create the Nuts-In-Can game. The agent initially watches a number of target objects get breifly flashed, one-by-one. These targets are randomly distributed about the target area. After the initial flash, each target is no longer visible. After all targets are flashed, the agent must then grab the pile the same number of times as there are targets. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v5 Reverse Cluster Match
-Use `gym.make('gordoncont-v5')` to create the Reverse Cluster Line Match game. The agent must match the number of target objects without aligning them. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v5')` to create the Reverse Cluster Line Match game. The agent must match the number of target objects without aligning them. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v6 Cluster Cluster Match
-Use `gym.make('gordoncont-v6')` to create the Cluster Cluster Match game. The target objects are distributed randomly. The agent must simply match the number of target objects with no structure imposed. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v6')` to create the Cluster Cluster Match game. The target objects are distributed randomly. The agent must simply match the number of target objects with no structure imposed. These are the default options for the game (see Game Details to understand what each variable does):
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v7 Brief Display
-Use `gym.make('gordoncont-v7')` to create the Brief Display game. This is the same as the Cluster Match variant except that the targets are only displayed for the first few frames of the game. The agent must then match the number of randomly distributed target objects from memory. 
+Use `gym.make('gordongames-v7')` to create the Brief Display game. This is the same as the Cluster Match variant except that the targets are only displayed for the first few frames of the game. The agent must then match the number of randomly distributed target objects from memory. 
 
 These are the default options for the game (see Game Details to understand what each variable does):
 
@@ -91,7 +91,7 @@ These are the default options for the game (see Game Details to understand what 
     targ_range = (1,10)
 
 #### Environment v8 Visible Nuts-In-Can
-Use `gym.make('gordoncont-v8')` to create the Visible Nuts-in-Can game. This is the same as the Nuts-In-Can variant except that the targets are displayed for the entire episode. 
+Use `gym.make('gordongames-v8')` to create the Visible Nuts-in-Can game. This is the same as the Nuts-In-Can variant except that the targets are displayed for the entire episode. 
 
 These are the default options for the game (see Game Details to understand what each variable does):
 
@@ -142,7 +142,7 @@ The agent receives a +1 reward if the agent removes the exact number of items pl
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 
-    env = gym.snake('gordoncont-v0')
+    env = gym.snake('gordongames-v0')
     env.targ_range = (1,5)
     observation = env.reset()
     ...

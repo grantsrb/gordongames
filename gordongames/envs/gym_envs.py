@@ -1,9 +1,9 @@
 import os, subprocess, time, signal
 import gym
-from gordoncont.ggames import Discrete, Box
-from gordoncont.ggames.controllers import *
-from gordoncont.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
-from gordoncont.ggames.utils import find_empty_space_along_row
+from gordongames.envs.ggames import Discrete
+from gordongames.envs.ggames.controllers import *
+from gordongames.envs.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
+from gordongames.envs.ggames.utils import find_empty_space_along_row
 import numpy as np
 import time
 
@@ -49,10 +49,9 @@ class GordonGame(gym.Env):
         self.targ_range = targ_range
         if type(targ_range) == int:
             self.targ_range = (targ_range,targ_range)
-        self.max_items = self.targ_range[-1]*3
         self.harsh = harsh
         self.viewer = None
-        self.action_space = Box((3,))
+        self.action_space = Discrete(6)
         self.is_grabbing = False
         self.seed(int(time.time()))
         self.set_controller()
@@ -89,10 +88,15 @@ class GordonGame(gym.Env):
     def step(self, action):
         """
         Args:
-            action: tuple of floats (3,) -> (x, y, grab)
-                the action should be a tuple of floats with the first
-                two indices indicating the x,y coordinate and the last
-                index indicating whether or not to grab
+            action: int
+                the action should be an int of either a direction or
+                a grab command
+                    0: null action
+                    1: move up one unit
+                    2: move right one unit
+                    3: move down one unit
+                    4: move left one unit
+                    5: grab/drop object
         Returns:
             last_obs: ndarray
                 the observation
@@ -104,16 +108,19 @@ class GordonGame(gym.Env):
                 whatever information the game contains
         """
         self.step_count += 1
-        xycoord = action[:2]
-        grab = int(action[2]>0)
+        if action < 5:
+            direction = action
+            grab = self.is_grabbing
+        else:
+            direction = STAY
+            grab = self._toggle_grab()
         self.last_obs,rew,done,info = self.controller.step(
-            xycoord,
-            grab
+            direction,
+            int(grab)
         )
         player = self.controller.register.player
         info["grab"] = self.get_other_obj_idx(player, grab)
         if self.step_count > self.max_steps: done = True
-        if info["n_items"] > self.max_items: done = True
         elif self.step_count == self.max_steps and rew == 0:
             rew = self.controller.max_punishment
             done = True
@@ -209,6 +216,12 @@ class ClusterMatch(GordonGame):
     the number of target objects. The target objects are randomly
     placed while the agent attempts to align the placed items along a
     single row.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
     """
     def set_controller(self):
         self.controller = ClusterMatchController(
@@ -268,6 +281,12 @@ class ReverseClusterMatch(GordonGame):
     Matching game. The user attempts to place the same number of items
     on the grid as the number of evenly spaced, aligned target objects.
     The placed items must not align with the target objects.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
     """
     def set_controller(self):
         self.controller = ReverseClusterMatchController(
@@ -285,6 +304,12 @@ class ClusterClusterMatch(GordonGame):
     number of items on the grid as the number of target objects.
     The target objects are randomly placed and no structure is imposed
     on the placement of the user's items.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
     """
     def set_controller(self):
         self.controller = ClusterClusterMatchController(
@@ -306,6 +331,12 @@ class BriefPresentation(GordonGame):
     The targets are removed from the agent's visual display after the
     DISPLAY_COUNT frames and the agent has to perform the counting task
     from memory.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
     """
     def set_controller(self):
         self.controller = BriefPresentationController(
@@ -324,12 +355,24 @@ class NutsInCan(GordonGame):
     This class creates a game in which the environment initially flashes
     the targets one by one until all targets are flashed. At the end
     of the flashing, a center piece appears (to indicate that the
-    flashing stage is over). The agent must then place the same number
-    of items as there are targets (each of which was flashed only
+    flashing stage is over). The agent must then grab the pile the same
+    number of times as there are targets (each of which was flashed only
     briefly at the beginning of the game).
 
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
     Once the agent believes the number of items is equal to the number
     of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
+    targets.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
     """
     def set_controller(self):
         self.controller = NutsInCanController(
@@ -341,7 +384,93 @@ class NutsInCan(GordonGame):
         self.controller.rand = self.rand
         self.controller.reset()
 
-class VisNuts(GordonGame):
+    def step(self, action):
+        """
+        Args:
+            action: int
+                the action should be an int of either a direction or
+                a grab command
+                    0: null action
+                    1: move up one unit
+                    2: move right one unit
+                    3: move down one unit
+                    4: move left one unit
+                    5: grab/drop object
+        Returns:
+            last_obs: ndarray
+                the observation
+            rew: float
+                the reward
+            done: bool
+                if true, the episode has ended
+            info: dict
+                whatever information the game contains
+        """
+        self.step_count += 1
+
+        direction = STAY
+        grab = 0
+        if action < 5:
+            direction = action
+            grab = 0 # We always handle grabs here
+        elif not self.controller.is_animating:
+            coord = self.controller.register.player.coord
+            if not self.controller.register.is_empty(coord):
+                grab = 1
+
+        # Check if player grabbed the pile
+        grabbed_type = self.get_other_obj_idx(
+            self.controller.register.player,
+            grab
+        )
+        # Other option is if it's an item, but this will only happen
+        # when the agent grabs one that has been placed by the env.
+        if grabbed_type == TYPE2PRIORITY[PILE]:
+            self.place_item()
+            direction = STAY
+            grab = 0
+        elif grabbed_type == TYPE2PRIORITY[BUTTON]:
+            direction = STAY
+            grab = 1
+
+        self.last_obs,rew,done,info = self.controller.step(
+            direction,
+            grab
+        )
+        player = self.controller.register.player
+        reg = self.controller.register
+        if self.step_count > self.max_steps: done = True
+        elif self.step_count == self.max_steps and rew == 0:
+            rew = self.controller.max_punishment
+            done = True
+        elif reg.n_items >= 2*reg.n_targs:
+            rew = self.controller.max_punishment
+            done = True
+        info["grab"] = done or grab or grabbed_type==TYPE2PRIORITY[PILE]
+        if grabbed_type==TYPE2PRIORITY[PILE]: info["n_items"] -= 1
+        return self.last_obs, rew, done, info
+
+    def place_item(self):
+        """
+        Creates and places an item along a row.
+        """
+        player = self.controller.register.player
+        middle = self.controller.register.grid.middle_row
+        row = 2
+        coord = None
+        while row < middle and coord is None:
+            coord = find_empty_space_along_row(
+                self.controller.register,
+                (row, player.coord[1])
+            )
+            row += 1
+        if coord is None: return
+        self.controller.register.make_object(
+            obj_type=ITEM,
+            coord=coord
+        )
+
+class VisNuts(NutsInCan):
     """
     Creates a gym version of Peter Gordon's Nuts-In-A-Can game in which
     the nuts remain visible.
@@ -350,8 +479,23 @@ class VisNuts(GordonGame):
     animation in which the targets are flashed one by one until all
     targets are visible. At the end of the animation, a center piece
     appears (as an indication that the flashing stage is over).
-    The agent must then place the same number of items as there are
+    The agent must then grab the pile the same
+    number of times as there are targets.
+
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
+    Once the agent believes the number of items is equal to the number
+    of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
     targets.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
     """
     def set_controller(self):
         self.controller = VisNutsController(
