@@ -20,6 +20,7 @@ class Controller:
                  targ_range: tuple=(1,10),
                  grid_size: tuple=(31,31),
                  pixel_density: int=1,
+                 hold_outs: set=set(),
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)
@@ -30,6 +31,9 @@ class Controller:
             the dimensions of the grid in grid units
         pixel_density: int
             the side length of a single grid unit in pixels
+        hold_outs: set of ints
+            a set of integer values representing numbers of targets
+            that should not be sampled when sampling targets
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -38,6 +42,8 @@ class Controller:
         self._targ_range = targ_range
         self._grid_size = grid_size
         self._pixel_density = pixel_density
+        self._hold_outs = hold_outs
+        assert len(set(range(targ_range[0],targ_range[1]+1))-hold_outs)>0
         self.is_animating = False
         self.rand = np.random.default_rng(int(time.time()))
         self.n_steps = 0
@@ -53,6 +59,10 @@ class Controller:
     @property
     def density(self):
         return self._pixel_density
+
+    @property
+    def hold_outs(self):
+        return self._hold_outs
 
     @property
     def n_targs(self):
@@ -188,6 +198,10 @@ class EvenLineMatchController(Controller):
         if n_targs is None:
             low, high = self.targ_range
             n_targs = self.rand.integers(low, high+1)
+            while n_targs is in self.hold_outs:
+                n_targs = self.rand.integers(low, high+1)
+        elif n_targs in self.hold_outs:
+            print("Overriding holds outs using", n_targs, "targs")
         # wipes items from grid and makes/deletes targs
         self.register.reset(n_targs)
         self.is_animating = True

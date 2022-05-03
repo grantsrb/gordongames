@@ -24,6 +24,7 @@ class GordonGame(gym.Env):
                  grid_size=(31,31),
                  pixel_density=5,
                  harsh=True,
+                 holds_outs=set(),
                  *args, **kwargs):
         """
         Args:
@@ -35,6 +36,9 @@ class GordonGame(gym.Env):
                 the number of pixels per unit in the grid
             harsh: bool
                 changes the reward system to be more continuous if false
+            hold_outs: set of ints
+                a set of integer values representing numbers of targets
+                that should not be sampled when sampling targets
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -50,6 +54,7 @@ class GordonGame(gym.Env):
         if type(targ_range) == int:
             self.targ_range = (targ_range,targ_range)
         self.harsh = harsh
+        self.hold_outs = hold_outs
         self.viewer = None
         self.action_space = Discrete(6)
         self.is_grabbing = False
@@ -204,7 +209,8 @@ class EvenLineMatch(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -228,7 +234,8 @@ class ClusterMatch(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -250,7 +257,8 @@ class OrthogonalLineMatch(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -270,7 +278,8 @@ class UnevenLineMatch(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -293,7 +302,8 @@ class ReverseClusterMatch(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -316,7 +326,8 @@ class ClusterClusterMatch(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -343,7 +354,8 @@ class BriefPresentation(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -379,7 +391,8 @@ class NutsInCan(GordonGame):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -502,7 +515,8 @@ class VisNuts(NutsInCan):
             grid_size=self.grid_size,
             pixel_density=self.pixel_density,
             harsh=self.harsh,
-            targ_range=self.targ_range
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
         )
         self.controller.rand = self.rand
         self.controller.reset()
