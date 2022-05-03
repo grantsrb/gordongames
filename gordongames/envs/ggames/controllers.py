@@ -198,7 +198,7 @@ class EvenLineMatchController(Controller):
         if n_targs is None:
             low, high = self.targ_range
             n_targs = self.rand.integers(low, high+1)
-            while n_targs is in self.hold_outs:
+            while n_targs in self.hold_outs:
                 n_targs = self.rand.integers(low, high+1)
         elif n_targs in self.hold_outs:
             print("Overriding holds outs using", n_targs, "targs")

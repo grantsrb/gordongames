@@ -10,7 +10,8 @@ import time
 if __name__=="__main__":
     render = True
     kwargs = {
-        "targ_range": (4,4),
+        "targ_range": (1,4),
+        "hold_outs": {3},
         "grid_size": (9,6),
         "pixel_density": 3,
         "seed": 123456,

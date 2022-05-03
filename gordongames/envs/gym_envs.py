@@ -24,7 +24,7 @@ class GordonGame(gym.Env):
                  grid_size=(31,31),
                  pixel_density=5,
                  harsh=True,
-                 holds_outs=set(),
+                 hold_outs=set(),
                  *args, **kwargs):
         """
         Args:
