@@ -54,7 +54,7 @@ class GordonGame(gym.Env):
         if type(targ_range) == int:
             self.targ_range = (targ_range,targ_range)
         self.harsh = harsh
-        self.hold_outs = hold_outs
+        self.hold_outs = set(hold_outs)
         self.viewer = None
         self.action_space = Discrete(6)
         self.is_grabbing = False
