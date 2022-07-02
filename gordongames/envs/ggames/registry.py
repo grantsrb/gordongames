@@ -322,10 +322,10 @@ class Register:
         This function is applied to the argued player's previous
         location. If any objects are overlapping they are handled as
         follows.
-            item on pile: item is deleted
-            item on item or button: item is placed in nearest empty
-                location. see find_space() for details into the order
-                of the search.
+            item or targ on pile: obj is deleted
+            item or targ on item or targ or button: item/targ is placed
+                in nearest empty location. see find_space() for details
+                into the order of the search.
 
         Nothing happens if one or fewer objects resides at the player's
         prev_coord
@@ -344,14 +344,27 @@ class Register:
             # pile too, then we delete the item
             if len(objs[ITEM]) > 0 and len(objs[PILE]) > 0:
                 self.delete_obj(objs[ITEM][0])
-            # If there is an item and another item or a button,
-            # then we find the nearest empty coordinate for one of the
-            # items (they're interchangeable)
+            # If there is a targ on the coordinate and there is a
+            # pile too, then we delete the targ
+            elif len(objs[TARG]) > 0 and len(objs[PILE]) > 0:
+                self.delete_obj(objs[TARG][0])
+            # If there is an item or a targ and another item,targ or
+            # button, then we find the nearest empty coordinate for
+            # one of the items
             elif len(objs[ITEM]) > 1 or\
-                    len(objs[ITEM]) > 0 and len(objs[BUTTON]) > 0:
+                    (len(objs[ITEM]) > 0 and\
+                        (len(objs[BUTTON]) > 0 or len(objs[TARG]) > 0)):
                 free_coord = self.find_space(player.prev_coord)
                 if free_coord is not None:
                     self.move_object(objs[ITEM][0], free_coord)
+                else:
+                    return FULL
+            elif len(objs[TARG]) > 1 or\
+                    (len(objs[TARG]) > 0 and\
+                        (len(objs[BUTTON]) > 0 or len(objs[ITEM]) > 0)):
+                free_coord = self.find_space(player.prev_coord)
+                if free_coord is not None:
+                    self.move_object(objs[TARG][0], free_coord)
                 else:
                     return FULL
         return STEP
@@ -515,8 +528,8 @@ class Register:
         The function operates as follows:
             create new item if previous location was a pile,
             raise button press event if previous location was a button,
-            carry item to current coordinate if previous location
-                was an item
+            carry targ or item to current coordinate if previous
+                location was a targ or item
 
         Args:
             player: GameObject
@@ -525,7 +538,7 @@ class Register:
         prev_objs = set(self.coord_register[tuple(player.prev_coord)])
         if len(prev_objs) > 0:
             for obj in prev_objs:
-                if obj.type == ITEM:
+                if obj.type == ITEM or obj.type == TARG:
                     self.move_object(obj, coord=player.coord)
                     return STEP
             # Only possibility for 2 objects is if player is one of them
@@ -568,10 +581,7 @@ class Register:
         """
         if coord is None:
             coord = self.get_signal_coord()
-        self.make_object(
-            obj_type=SIGNAL,
-            coord=coord
-        )
+        self.make_object( obj_type=SIGNAL, coord=coord )
 
     def make_object(self, obj_type: str, coord: tuple):
         """
@@ -749,6 +759,30 @@ class Register:
         self.move_object(self.button, (0, int(cols[1])))
         self.move_object(self.player, (0, int(cols[2])))
 
+    def rand_nav_placement(self):
+        """
+        Places the pile, button, and player randomly along the top
+        row of the grid.
+        """
+        for _ in self._targs:
+            self.make_object(obj_type=ITEM, coord=(0,0))
+        objs = [*(self.obj_register-self._targs)]
+        s = len(objs)
+        cols = self.rand.integers(low=0,high=self.grid.shape[1],size=s)
+        obj_order = [int(x) for x in self.rand.permutation(s)]
+        if self.grid.is_divided: high = self.grid.middle_row
+        else: high = self.grid.shape[0]
+        coords = set()
+        for i in obj_order:
+            row = self.rand.integers(0,high)
+            coord = (row,cols[i])
+            while coord is None or not self.is_empty(coord) or\
+                                               coord in coords:
+                row = self.rand.integers(0,high)
+                coord = (row,cols[i])
+            coords.add(coord)
+            self.move_object(objs[i], coord=coord)
+
     def rand_targ_placement(self, reserved_coords=set()):
         """
         Places the targets randomly on the grid.
@@ -859,6 +893,17 @@ class Register:
             row = start_row + i*(space_between+1)
             coord = (row, col)
             self.move_object(targ, coord=coord)
+
+    def navigation_task(self):
+        """
+        Initialization func for the navigation game.
+
+        The agent must navigate to the target items and return them
+        to the dispenser.
+        """
+        self.rand_nav_placement()
+        self.rand_targ_placement()
+        self.draw_register()
 
     def even_line_match(self):
         """

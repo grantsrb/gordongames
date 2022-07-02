@@ -20,13 +20,14 @@ if __name__=="__main__":
     env_names = [
         "gordongames-v0",
         "gordongames-v1",
-        #"gordongames-v2",
+        "gordongames-v2",
         "gordongames-v3",
         "gordongames-v4",
         "gordongames-v5",
         "gordongames-v6",
         "gordongames-v7",
         "gordongames-v8",
+        "gordongames-v9",
     ]
     start_time = time.time()
     for env_name in env_names:
@@ -35,7 +36,7 @@ if __name__=="__main__":
         env.seed(kwargs["seed"])
         oracle = GordonOracle(env_name)
         targ_distr = {i: 0 for i in range(1,10)}
-        rng = range(20)
+        rng = range(5)
         if not render: rng = tqdm(rng)
         for i in rng:
             obs = env.reset()
@@ -45,6 +46,7 @@ if __name__=="__main__":
                 actn = oracle(env)
                 if render:
                     print("Testing Env:", env_name)
+                    print("Env is_grabbing:", env.is_grabbing)
                     if actn < 5:
                         print("actn:", DIRECTION2STR[actn])
                     else:

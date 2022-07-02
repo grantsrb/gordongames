@@ -99,6 +99,15 @@ These are the default options for the game (see Game Details to understand what 
     pixel_density = 1
     targ_range = (1,10)
 
+#### Environment v9 Navigation Task
+Use `gym.make('gordongames-v9')` to create the Navigation Task game. The goal of this game is to return all items to the dispenser and then end the episode. This is a non-numeric game which can be used as a control for visual experience without numeric experience.
+
+These are the default options for the game (see Game Details to understand what each variable does):
+
+    grid_size = [33,33]
+    pixel_density = 1
+    targ_range = (1,10)
+
 ## Game Details
 Each game consists of a randomly intitialized grid with various objects distributed on the grid depending on the game type. The goal is for the agent to first complete some task and then press the end button located in the upper right corner of the grid. Episodes last until the agent presses the end button. The agent can move left, up, right, down, or stay still. The agent also has the ability to interact with objects via the grab action. Grab only acts on objects in the same square as the agent. If the object is an "item", the agent carries the item to wherever it moves on that step. If the object is a "pile", a new item is created and carried with the agent for that step. The ending button is pressed using the grab action. The reward is only granted at the end of each episode if the task was completed successfully.
 
@@ -133,6 +142,9 @@ The agent receives a +1 reward if there exists a single item for each target. Th
 
 ##### Environment v8
 The agent receives a +1 reward if the agent removes the exact number of items placed in the pile.
+
+##### Environment v9
+The agent receives a +1 reward if the agent deletes all items placed on the grid. Otherwise -1.
 
 #### Game Options
 
