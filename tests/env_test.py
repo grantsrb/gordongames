@@ -8,14 +8,15 @@ import matplotlib.pyplot as plt
 import time
 
 if __name__=="__main__":
-    render = True
+    render = False
     kwargs = {
-        "targ_range": (1,4),
+        "targ_range": (11,12),
         "hold_outs": {3},
-        "grid_size": (9,6),
+        "grid_size": (27,15),
         "pixel_density": 3,
         "seed": 123456,
         "harsh": True,
+        "max_steps": None,
     }
     env_names = [
         "gordongames-v0",
@@ -35,7 +36,13 @@ if __name__=="__main__":
         env = gym.make(env_name, **kwargs)
         env.seed(kwargs["seed"])
         oracle = GordonOracle(env_name)
-        targ_distr = {i: 0 for i in range(1,10)}
+        targ_distr = {
+            i: 0 for i in range(
+                kwargs["targ_range"][0],kwargs["targ_range"][-1]+1
+            )
+        }
+        targ_distr[1] = 0
+        targ_distr[2] = 0
         rng = range(5)
         if not render: rng = tqdm(rng)
         for i in rng:
