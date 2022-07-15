@@ -154,6 +154,139 @@ class Controller:
         self.n_steps = 0
         raise NotImplemented
 
+class NavigationTaskController(Controller):
+    """
+    This controller creates an instance of a navigation game. The
+    agent must simply navigate to the target items on the grid, bring
+    it back to the dispenser, and then end the episode by pressing
+    the ending button.
+    """
+    def __init__(self, harsh=True, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.harsh = harsh
+        self.grid = Grid(
+            grid_size=self.grid_size,
+            pixel_density=self.density,
+            divide=True
+        )
+        self.register = Register(self.grid, n_targs=2)
+
+    def init_variables(self, n_targs=None):
+        """
+        This function should be called everytime the environment starts
+        a new episode.
+        """
+        self.register.rand = self.rand
+        self.n_steps = 0
+        if n_targs is None: n_targs = 2
+        # wipes items from grid and makes/deletes targs
+        self.register.reset(n_targs)
+        self.is_animating = False
+        self.register.display_targs = True
+
+    def reset(self, n_targs=None):
+        """
+        This function should be called everytime the environment starts
+        a new episode.
+        """
+        self.init_variables(n_targs)
+        self.register.navigation_task()
+        self.register.make_signal()
+        return self.grid.grid
+
+    def calculate_reward(self, harsh: bool=False):
+        """
+        Determines what reward to return. In this case, checks for the
+        number of items on the grid. The goal is 0 items. Returns the
+        negative of the number of items. If harsh, returns +1 for 0
+        items and -1 otherwise.
+
+        Args:
+            harsh: bool
+                if true, returns a postive 1 reward only when zero
+                items remain on the grid at the end of the episode.
+                if false, returns the negative of the number of items
+                remaining on the grid at the end of the episode.
+
+                harsh == False:
+                    rew = -n_items
+                harsh == True:
+                    rew = -1*(n_items>0) + (n_items==0)
+        Returns:
+            rew: float
+                the calculated reward
+        """
+        n_items = self.register.n_items
+        if harsh:
+            return -1*(n_items>0) + int(n_items==0)
+        else:
+            return -n_items
+
+    def step(self, direction: int, grab: int):
+        """
+        Step takes a movement and a grabbing action. The function
+        moves the player and any items in the following way.
+
+        If the player was carrying an object and stepped onto another
+        object, the game is handled as follows. While the player
+        continues to grab, all objects and the player remain overlayn.
+        If the player releases the grab button while an object is on
+        top of another object, one of 2 things can happen. If the 
+        underlying object is a pile, the item is returned to the pile.
+        If the underlying object is an item, the previously carried
+        item is placed in the nearest empty location in this order.
+        Up, right, down, left. If none are available a search algorithm
+        is performed spiraling outward from the center. i.e. up 2, up 2
+        right 1, up 2 right 2, up 1 right 2, right 2, etc.
+
+        Args:
+          direction: int [0, 1, 2, 3, 4]
+            Check DIRECTIONS to ensure these values haven't changed
+                0: no movement
+                1: move up (lower row unit)
+                2: move right (higher column unit)
+                3: move down (higher row unit)
+                4: move left (lower column unit)
+          grab: int [0,1]
+            grab is an action to enable the agent to carry items around
+            the grid. when a player is on top of an item, they can grab
+            the item and carry it with them as they move. If the player
+            is on top of a pile, a new item is created and carried with
+            them to the next square.
+        
+            0: quit grabbing item
+            1: grab item. item will follow player to whichever square
+              they move to.
+        """
+        self.n_steps += 1
+        info = {
+            "is_harsh": self.harsh,
+            "n_targs": self.n_targs,
+            "n_items": self.register.n_items,
+            "n_aligned": len(get_aligned_items(
+                items=self.register.items,
+                targs=self.register.targs,
+                min_row=0
+            )),
+            "disp_targs":int(self.register.display_targs),
+            "is_animating":int(self.is_animating),
+        }
+
+        event = self.register.step(direction, grab)
+
+        done = False
+        rew = 0
+        if event == BUTTON_PRESS:
+            rew = self.calculate_reward(harsh=self.harsh)
+            done = True
+        elif event == FULL:
+            done = True
+            rew = -1
+        elif event == STEP:
+            done = False
+            rew = 0
+        return self.grid.grid, rew, done, info
+
 class EvenLineMatchController(Controller):
     """
     This class creates an instance of an Even Line Match game.

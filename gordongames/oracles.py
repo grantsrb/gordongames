@@ -51,6 +51,8 @@ class GordonOracle(Oracle):
             self.brain = gg.envs.ggames.ai.brief_display
         elif self.env_type == "gordongames-v8":
             self.brain = gg.envs.ggames.ai.nuts_in_can
+        elif self.env_type == "gordongames-v9":
+            self.brain = gg.envs.ggames.ai.navigation_task
         else:
             raise NotImplemented
 
@@ -63,7 +65,9 @@ class GordonOracle(Oracle):
         (direction, grab) = self.brain(env.controller)
         if grab == env.is_grabbing:
             return direction
-        elif self.brain == gg.envs.ggames.ai.nuts_in_can:
-            return gg.envs.ggames.constants.GRAB
         else:
+            # The controllers use the grab signal as a toggle,
+            # the ai determines if the agent should be grabing at every
+            # step. Thus we only issue a grab action when it differs
+            # from the current grab state within the environment
             return gg.envs.ggames.constants.GRAB

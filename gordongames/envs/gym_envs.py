@@ -2,7 +2,7 @@ import os, subprocess, time, signal
 import gym
 from gordongames.envs.ggames import Discrete
 from gordongames.envs.ggames.controllers import *
-from gordongames.envs.ggames.constants import STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
+from gordongames.envs.ggames.constants import GRAB, STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
 from gordongames.envs.ggames.utils import find_empty_space_along_row
 import numpy as np
 import time
@@ -118,7 +118,7 @@ class GordonGame(gym.Env):
                 whatever information the game contains
         """
         self.step_count += 1
-        if action < 5:
+        if action != GRAB:
             direction = action
             grab = self.is_grabbing
         else:
@@ -379,6 +379,53 @@ class BriefPresentation(GordonGame):
         )
         self.controller.rand = self.rand
         self.controller.reset()
+
+class NavigationTask(GordonGame):
+    """
+    Creates a gym version of a simple navigation task.
+
+    This class creates a game in which the environment initializes
+    with items, player, button, and dispenser all in the playable
+    half of the grid. The player must then navigate to all items
+    and drag them back to the dispenser. Then they must end the game
+    using the ending button.
+    """
+    def set_controller(self):
+        self.controller = NavigationTaskController(
+            grid_size=self.grid_size,
+            pixel_density=self.pixel_density,
+            harsh=self.harsh,
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs
+        )
+        self.controller.rand = self.rand
+        self.controller.reset()
+
+    def step(self, action):
+        """
+        Args:
+            action: int
+                the action should be an int of either a direction or
+                a grab command
+                    0: null action
+                    1: move up one unit
+                    2: move right one unit
+                    3: move down one unit
+                    4: move left one unit
+                    5: grab/drop object
+        Returns:
+            last_obs: ndarray
+                the observation
+            rew: float
+                the reward
+            done: bool
+                if true, the episode has ended
+            info: dict
+                whatever information the game contains
+        """
+        self.last_obs, rew, done, info = super().step(action)
+        info["grab"] = done or info["grab"]
+        return self.last_obs, rew, done, info
 
 class NutsInCan(GordonGame):
     """

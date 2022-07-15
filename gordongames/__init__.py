@@ -38,3 +38,7 @@ register(
     id='gordongames-v8',
     entry_point='gordongames.envs:VisNuts',
 )
+register(
+    id='gordongames-v9',
+    entry_point='gordongames.envs:NavigationTask',
+)

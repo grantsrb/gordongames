@@ -70,6 +70,42 @@ def get_direction(coord0, coord1, rand=None):
     else:
         return STAY
 
+def navigation_task(contr):
+    """
+    Finds the items on the grid and brings them back to the dispenser
+    to delete them. Then agent ends the game when no items are left.
+    """
+    register = contr.register
+    player = register.player
+    items = register.items
+
+    # determine which object we should grab next
+    if len(items) == 0:
+        grab_obj = register.button
+    else:
+        grab_obj = nearest_obj(player, items)
+
+    # if on top of grab_obj, grab it, otherwise don't
+    if grab_obj.coord == player.coord: grab = True
+    else: grab = False
+
+    # determine where to move next
+    if not grab: goal_coord = grab_obj.coord
+    # If we're on top of the button, simply issue a STAY order
+    elif grab_obj == register.button: return STAY, grab
+    elif len(items) > 0:
+        goal_coord = register.pile.coord
+        if player.coord == goal_coord:
+            return STAY, False
+
+    direction = get_direction(
+        player.coord,
+        goal_coord,
+        register.rand
+    )
+    return direction, grab
+
+
 def even_line_match(contr):
     """
     Takes a register and finds the optimal movement and grab action
