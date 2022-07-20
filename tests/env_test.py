@@ -17,6 +17,7 @@ if __name__=="__main__":
         "seed": 123456,
         "harsh": True,
         "max_steps": None,
+        "rand_pdb": False,
     }
     env_names = [
         "gordongames-v0",

@@ -21,6 +21,7 @@ class Controller:
                  grid_size: tuple=(31,31),
                  pixel_density: int=1,
                  hold_outs: set=set(),
+                 rand_pdb: bool=True,
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)
@@ -34,6 +35,11 @@ class Controller:
         hold_outs: set of ints
             a set of integer values representing numbers of targets
             that should not be sampled when sampling targets
+        rand_pdb: bool
+            if true, the player, dispenser, and button are randomly
+            placed along the topmost row at the beginning of each
+            episode. Otherwise, they are placed evenly spaced in the
+            order player, dispenser, button from left to right.
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -43,6 +49,7 @@ class Controller:
         self._grid_size = grid_size
         self._pixel_density = pixel_density
         self._hold_outs = set(hold_outs)
+        self.rand_pdb = rand_pdb
         trgs = set(range(targ_range[0],targ_range[1]+1))
         assert len(trgs-hold_outs)>0
         self.is_animating = False
@@ -190,7 +197,7 @@ class NavigationTaskController(Controller):
         a new episode.
         """
         self.init_variables(n_targs)
-        self.register.navigation_task()
+        self.register.navigation_task(self.rand_pdb)
         self.register.make_signal()
         return self.grid.grid
 
@@ -346,8 +353,7 @@ class EvenLineMatchController(Controller):
         a new episode.
         """
         self.init_variables(n_targs)
-        # randomizes object placement on grid
-        self.register.even_line_match()
+        self.register.even_line_match(rand_pdb=self.rand_pdb)
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -410,7 +416,7 @@ class ClusterMatchController(EvenLineMatchController):
         for the agent to count the targets on the grid.
         """
         self.init_variables(n_targs)
-        self.register.cluster_match()
+        self.register.cluster_match(rand_pdb=self.rand_pdb)
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -575,7 +581,7 @@ class UnevenLineMatchController(EvenLineMatchController):
         """
         self.init_variables(n_targs)
         # randomizes object placement on grid
-        self.register.uneven_line_match()
+        self.register.uneven_line_match(rand_pdb=self.rand_pdb)
         return self.grid.grid
 
 class OrthogonalLineMatchController(ClusterMatchController):
@@ -593,7 +599,7 @@ class OrthogonalLineMatchController(ClusterMatchController):
         """
         self.init_variables(n_targs)
         # randomizes object placement on grid
-        self.register.orthogonal_line_match()
+        self.register.orthogonal_line_match(rand_pdb=self.rand_pdb)
         return self.grid.grid
 
 class BriefPresentationController(ClusterMatchController):
@@ -696,7 +702,7 @@ class NutsInCanController(EvenLineMatchController):
 
         # randomize object placement on grid, only display one target
         # for first frame. invis_targs is a set
-        self.register.cluster_match()
+        self.register.cluster_match(rand_pdb=self.rand_pdb)
         self.invis_targs = self.register.targs
         self.targ = None
         for targ in self.invis_targs:
@@ -821,7 +827,10 @@ class VisNutsController(EvenLineMatchController):
         self.init_variables(n_targs)
         # randomize object placement on grid, only display one target
         # for first frame. invis_targs is a set
-        self.register.cluster_match({self.register.get_signal_coord()})
+        self.register.cluster_match(
+            {self.register.get_signal_coord()},
+            rand_pdb=self.rand_pdb
+        )
         self.invis_targs = self.register.targs
         self.targ = None
         for targ in self.invis_targs:

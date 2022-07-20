@@ -749,20 +749,28 @@ class Register:
         self.display_targs = False
         self.draw_register()
 
-    def rand_pile_button_player(self):
+    def place_player_pile_button(self, rand_locs=True):
         """
-        Places the pile, button, and player randomly along the top
-        row of the grid.
+        Places the pile, button, and player randomly or evenly along
+        the top row of the grid.
+
+        Args:
+            rand_locs: bool
+                if true, places the player, pile, and button evenly
+                spaced along the top row of the grid in that order.
+                Otherwise they are randomly placed in any order.
         """
-        cols = self.rand.permutation(self.grid.shape[1])
-        self.move_object(self.pile, (0, int(cols[0])))
-        self.move_object(self.button, (0, int(cols[1])))
-        self.move_object(self.player, (0, int(cols[2])))
+        if rand_locs:
+            cols = self.rand.permutation(self.grid.shape[1])
+        else:
+            cols = Register.even_spacing(self.grid.shape[1], 3)
+        self.move_object(self.player, (0, int(cols[0])))
+        self.move_object(self.pile,   (0, int(cols[1])))
+        self.move_object(self.button, (0, int(cols[2])))
 
     def rand_nav_placement(self):
         """
-        Places the pile, button, and player randomly along the top
-        row of the grid.
+        Places all objects randomly on the board.
         """
         for _ in self._targs:
             self.make_object(obj_type=ITEM, coord=(0,0))
@@ -806,6 +814,19 @@ class Register:
                 coord = (row, col)
             coords.add(coord)
             self.move_object(targ, coord=coord)
+
+    @staticmethod
+    def even_spacing(max_int, n):
+        """
+        Returns a list of indices that denote n evenly spaced indices
+        ranging from 0 to max_int inclusive.
+
+        Args:
+            max_int: int
+                the total space to work with.
+        """
+        assert n>0
+        return [int(i) for i in np.linspace(0,max_int,n+2)[1:-1]]
 
     def even_targ_spacing(self):
         """
@@ -894,7 +915,7 @@ class Register:
             coord = (row, col)
             self.move_object(targ, coord=coord)
 
-    def navigation_task(self):
+    def navigation_task(self, *args, **kwargs):
         """
         Initialization func for the navigation game.
 
@@ -905,19 +926,26 @@ class Register:
         self.rand_targ_placement()
         self.draw_register()
 
-    def even_line_match(self):
+    def even_line_match(self, rand_pdb=True):
         """
         Initialization function for the line match game A.
 
         The agent must align an item along the column of each
         of the target objects
+
+        Args:
+            rand_pdb: bool
+                if true, the player, dispenser, and button are randomly
+                placed along the topmost row at the beginning of each
+                episode. Otherwise, they are placed evenly spaced in the
+                order player, dispenser, button from left to right.
         """
         # each is randomly placed in the top row of the grid
-        self.rand_pile_button_player() 
+        self.place_player_pile_button(rand_pdb) 
         self.even_targ_spacing()
         self.draw_register()
 
-    def cluster_match(self, reserved_coords=set()):
+    def cluster_match(self, reserved_coords=set(), rand_pdb=True):
         """
         Intialization function for the Cluster Match game B.
 
@@ -929,30 +957,49 @@ class Register:
                 if you wish any spaces to be avoided when placing the
                 target objects, you can specify these coordinates in
                 the reserved_coords set
+            rand_pdb: bool
+                if true, the player, dispenser, and button are randomly
+                placed along the topmost row at the beginning of each
+                episode. Otherwise, they are placed evenly spaced in the
+                order player, dispenser, button from left to right.
         """
-        self.rand_pile_button_player() 
+        self.place_player_pile_button(rand_pdb) 
         self.rand_targ_placement(reserved_coords=reserved_coords)
         self.draw_register()
 
-    def orthogonal_line_match(self):
+    def orthogonal_line_match(self, rand_pdb=True):
         """
         Initialization function for the orthogonal line match game C.
 
         The agent must evenly space an item for each target along a
         single column.
+
+        Args:
+            rand_pdb: bool
+                if true, the player, dispenser, and button are randomly
+                placed along the topmost row at the beginning of each
+                episode. Otherwise, they are placed evenly spaced in the
+                order player, dispenser, button from left to right.
         """
-        self.rand_pile_button_player()
+        self.place_player_pile_button(rand_pdb)
         self.vertical_targ_spacing()
         self.draw_register()
 
-    def uneven_line_match(self):
+    def uneven_line_match(self, rand_pdb=True):
         """
         Initialization function for the uneven line match game D.
 
         The agent must align an item along the column of each
         of the target objects
+
+        Args:
+            rand_pdb: bool
+                if true, the player, dispenser, and button are randomly
+                placed along the topmost row at the beginning of each
+                episode. Otherwise, they are placed evenly spaced in the
+                order player, dispenser, button from left to right.
         """
-        self.rand_pile_button_player()
+        self.place_player_pile_button(rand_pdb)
         self.uneven_targ_spacing()
         self.draw_register()
 

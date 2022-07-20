@@ -26,6 +26,7 @@ class GordonGame(gym.Env):
                  harsh=True,
                  max_steps=None,
                  hold_outs=set(),
+                 rand_pdb=True,
                  *args, **kwargs):
         """
         Args:
@@ -42,6 +43,10 @@ class GordonGame(gym.Env):
             hold_outs: set of ints
                 a set of integer values representing numbers of targets
                 that should not be sampled when sampling targets
+            rand_pdb: bool
+                if true, the player, dispenser, and button are randomly
+                placed along the topmost row at the beginning of the
+                game.
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -60,6 +65,7 @@ class GordonGame(gym.Env):
         self.harsh = harsh
         if hold_outs is None: hold_outs = set()
         self.hold_outs = set(hold_outs)
+        self.rand_pdb = rand_pdb
         self.viewer = None
         self.action_space = Discrete(6)
         self.is_grabbing = False
@@ -230,7 +236,8 @@ class EvenLineMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -255,7 +262,8 @@ class ClusterMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -278,7 +286,8 @@ class OrthogonalLineMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -299,7 +308,8 @@ class UnevenLineMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -323,7 +333,8 @@ class ReverseClusterMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -347,7 +358,8 @@ class ClusterClusterMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -375,7 +387,8 @@ class BriefPresentation(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -396,7 +409,8 @@ class NavigationTask(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -459,7 +473,8 @@ class NutsInCan(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -580,7 +595,8 @@ class VisNuts(NutsInCan):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
-            hold_outs=self.hold_outs
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
         )
         self.controller.rand = self.rand
         self.controller.reset()
