@@ -523,9 +523,6 @@ class NutsInCan(GordonGame):
         elif self.step_count == self.max_steps and rew == 0:
             rew = self.controller.max_punishment
             done = True
-        elif reg.n_items >= 2*reg.n_targs:
-            rew = self.controller.max_punishment
-            done = True
         info["grab"] = done or grab or grabbed_type==TYPE2PRIORITY[PILE]
         if grabbed_type==TYPE2PRIORITY[PILE]: info["n_items"] -= 1
         return self.last_obs, rew, done, info
