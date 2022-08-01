@@ -764,6 +764,7 @@ class Register:
             cols = self.rand.permutation(self.grid.shape[1])
         else:
             cols = Register.even_spacing(self.grid.shape[1], 3)
+            cols[0] = cols[1]-1
         self.move_object(self.player, (0, int(cols[0])))
         self.move_object(self.pile,   (0, int(cols[1])))
         self.move_object(self.button, (0, int(cols[2])))
