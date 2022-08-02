@@ -6,7 +6,7 @@ from gordongames.envs.ggames.constants import DIRECTION2STR
 if __name__=="__main__":
     targ_range = (1,13)
     grid_size = (15,15)
-    pixel_density=4
+    pixel_density=1
     harsh=True
     contr = controllers.ClusterMatchController(
         targ_range=targ_range,

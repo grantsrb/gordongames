@@ -8,28 +8,30 @@ import matplotlib.pyplot as plt
 import time
 
 if __name__=="__main__":
-    render = False
+    render = True
+    n_episodes = 1000
     kwargs = {
-        "targ_range": (11,12),
-        "hold_outs": {3},
-        "grid_size": (27,15),
-        "pixel_density": 3,
+        "targ_range": (1,5),
+        "hold_outs": {},
+        "grid_size": (13,15),
+        "pixel_density": 1,
         "seed": 123456,
         "harsh": True,
         "max_steps": None,
         "rand_pdb": False,
     }
     env_names = [
-        "gordongames-v0",
-        "gordongames-v1",
-        "gordongames-v2",
-        "gordongames-v3",
-        "gordongames-v4",
-        "gordongames-v5",
-        "gordongames-v6",
-        "gordongames-v7",
-        "gordongames-v8",
-        "gordongames-v9",
+        #"gordongames-v0",
+        #"gordongames-v1",
+        #"gordongames-v2",
+        #"gordongames-v3",
+        #"gordongames-v4",
+        #"gordongames-v5",
+        #"gordongames-v6",
+        #"gordongames-v7",
+        #"gordongames-v8",
+        #"gordongames-v9",
+        "gordongames-v10",
     ]
     start_time = time.time()
     for env_name in env_names:
@@ -44,7 +46,7 @@ if __name__=="__main__":
         }
         targ_distr[1] = 0
         targ_distr[2] = 0
-        rng = range(5)
+        rng = range(n_episodes)
         if not render: rng = tqdm(rng)
         for i in rng:
             obs = env.reset()
