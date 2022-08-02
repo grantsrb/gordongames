@@ -600,3 +600,46 @@ class VisNuts(NutsInCan):
         )
         self.controller.rand = self.rand
         self.controller.reset()
+
+class StaticVisNuts(NutsInCan):
+    """
+    Creates a gym version of Peter Gordon's Nuts-In-A-Can game in which
+    the nuts remain visible. The difference between this variant and
+    the VisNuts variant is that in this variant, all nuts are displayed
+    immediately at the beginning. The agent is still unable to interact
+    with the button until the requisite number of frames has passed.
+
+    This class creates a game in which the environment has an initial
+    animation in which the targets are all displayed at the very
+    beginning. The same number of frames as there are targets passes
+    at which point a center signal piece
+    appears (as an indication that the initial animation stage is over).
+    The agent must then grab the pile the same
+    number of times as there are targets.
+
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
+    Once the agent believes the number of items is equal to the number
+    of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
+    targets.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
+    """
+    def set_controller(self):
+        self.controller = StaticVisNutsController(
+            grid_size=self.grid_size,
+            pixel_density=self.pixel_density,
+            harsh=self.harsh,
+            targ_range=self.targ_range,
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb
+        )
+        self.controller.rand = self.rand
+        self.controller.reset()

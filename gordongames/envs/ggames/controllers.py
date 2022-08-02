@@ -926,3 +926,40 @@ class VisNutsController(EvenLineMatchController):
             targ.color = COLORS[TARG]
         self.is_animating = False
 
+class StaticVisNutsController(VisNutsController):
+    """
+    This class creates a game in which the environment has an initial
+    animation in which the targets are all displayed at the very
+    beginning. The same number of frames as there are targets passes
+    at which point a center signal piece
+    appears (as an indication that the initial animation stage is over).
+    The agent must then grab the pile the same
+    number of times as there are targets.
+
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
+    Once the agent believes the number of items is equal to the number
+    of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
+    targets.
+    """
+    def reset(self, n_targs=None):
+        """
+        This function should be called everytime the environment starts
+        a new episode.
+        """
+        self.init_variables(n_targs)
+        # randomize object placement on grid, only display one target
+        # for first frame. invis_targs is a set
+        self.register.cluster_match(
+            {self.register.get_signal_coord()},
+            rand_pdb=self.rand_pdb
+        )
+        self.invis_targs = self.register.targs
+        self.targ = None
+        self.flashed_targs = []
+        self.register.draw_register()
+        return self.grid.grid
+

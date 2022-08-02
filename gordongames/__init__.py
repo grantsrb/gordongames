@@ -42,3 +42,7 @@ register(
     id='gordongames-v9',
     entry_point='gordongames.envs:NavigationTask',
 )
+register(
+    id='gordongames-v10',
+    entry_point='gordongames.envs:StaticVisNuts',
+)

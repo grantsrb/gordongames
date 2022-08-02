@@ -108,6 +108,15 @@ These are the default options for the game (see Game Details to understand what 
     pixel_density = 1
     targ_range = (1,10)
 
+#### Environment v10 Static Visible Nuts-In-Can
+Use `gym.make('gordongames-v10')` to create the Static Visible Nuts-in-Can game. This is the same as the Visible Nuts-In-Can variant except that all targets are displayed on the first frame instead of being revealed one-by-one.
+
+These are the default options for the game (see Game Details to understand what each variable does):
+
+    grid_size = [33,33]
+    pixel_density = 1
+    targ_range = (1,10)
+
 ## Game Details
 Each game consists of a randomly intitialized grid with various objects distributed on the grid depending on the game type. The goal is for the agent to first complete some task and then press the end button located in the upper right corner of the grid. Episodes last until the agent presses the end button. The agent can move left, up, right, down, or stay still. The agent also has the ability to interact with objects via the grab action. Grab only acts on objects in the same square as the agent. If the object is an "item", the agent carries the item to wherever it moves on that step. If the object is a "pile", a new item is created and carried with the agent for that step. The ending button is pressed using the grab action. The reward is only granted at the end of each episode if the task was completed successfully.
 
@@ -146,12 +155,17 @@ The agent receives a +1 reward if the agent removes the exact number of items pl
 ##### Environment v9
 The agent receives a +1 reward if the agent deletes all items placed on the grid. Otherwise -1.
 
+##### Environment v10
+The agent receives a +1 reward if the agent removes the exact number of items placed in the pile.
+
+
 #### Game Options
 
 - `grid_size` - An row,col coordinate denoting the number of units on the grid (height, width).
 - `pixel_density` - Number of numpy pixels within a single grid unit.
 - `targ_range` - A range of possible initial target object counts for each game (inclusive). Must be less than `grid_size`. 
 -  hold\_outs  - a set or list of target counts that should not be considered when creating a new game
+-  rand\_pdb  - if true, the player, dispenser (aka pile), and ending button are randomly distributed along the top row at the beginning of the game. Otherwise they are deterministically set.
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 
