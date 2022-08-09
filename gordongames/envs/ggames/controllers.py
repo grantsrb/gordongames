@@ -22,6 +22,8 @@ class Controller:
                  pixel_density: int=1,
                  hold_outs: set=set(),
                  rand_pdb: bool=True,
+                 rand_timing: bool=False,
+                 timing_p: float=0.8,
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)
@@ -40,6 +42,16 @@ class Controller:
             placed along the topmost row at the beginning of each
             episode. Otherwise, they are placed evenly spaced in the
             order player, dispenser, button from left to right.
+        rand_timing: bool
+            if true, the number of frames for a pixel to be displayed
+            at the beginning is uniformly sampled from 1-2
+        timing_p: float between 0 and 1
+            the probability of displaying the next target item. the
+            animation phase continues until all targets are displayed
+            but with probability 1-timing_p no new targets are displayed
+            for any given step in the animation phase. This is used
+            to discourage the model from counting the number of frames
+            rather than the items.
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -50,6 +62,8 @@ class Controller:
         self._pixel_density = pixel_density
         self._hold_outs = set(hold_outs)
         self.rand_pdb = rand_pdb
+        self.rand_timing = rand_timing
+        self.timing_p = timing_p
         trgs = set(range(targ_range[0],targ_range[1]+1))
         assert len(trgs-hold_outs)>0
         self.is_animating = False
@@ -135,7 +149,12 @@ class Controller:
         if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal()
             self.is_animating = False
-        if self.n_steps <= self.n_targs+1:
+        if self.n_steps < self.n_targs+1:
+            grab = 0
+            if self.rand_timing and np.random.random()>self.timing_p:
+                self.n_steps -= 1
+            info["n_items"] = self.n_steps-1
+        elif self.n_steps == self.n_targs+1:
             grab = 0
             info["n_items"] = self.n_steps-1
 
@@ -606,7 +625,9 @@ class BriefPresentationController(ClusterMatchController):
     """
     This class creates an instance of the Cluster Line Match game in
     which the presentation of the number of targets is only displayed
-    for 5 frames at the beginning.
+    for n_targs frames total or 1*n_targs-2*n_targs frames depending on
+    the value of self.rand_timing (in the sampling case, the value is
+    uniformly sampled at the beginning of the episode).
 
     The agent must place the same number of items as the number of
     targets that were originally displayed along a single row. The
@@ -656,7 +677,12 @@ class BriefPresentationController(ClusterMatchController):
             self.register.make_signal()
             self.register.hide_targs()
             self.is_animating = False
-        if self.n_steps <= self.n_targs+1:
+        if self.n_steps < self.n_targs+1:
+            grab = 0
+            if self.rand_timing and np.random.random()>self.timing_p:
+                self.n_steps -= 1
+            info["n_items"] = self.n_steps-1
+        elif self.n_steps == self.n_targs+1:
             grab = 0
             info["n_items"] = self.n_steps-1
 
@@ -757,9 +783,12 @@ class NutsInCanController(EvenLineMatchController):
             self.targ.color = COLORS[TARG]
         elif len(self.invis_targs) > 0:
             self.targ.color = COLORS[DEFAULT]
-            self.flashed_targs.append(self.targ)
-            self.targ = self.invis_targs.pop()
-            self.targ.color = COLORS[TARG]
+            if self.rand_timing and np.random.random()>self.timing_p:
+                self.n_steps -= 1
+            else:
+                self.flashed_targs.append(self.targ)
+                self.targ = self.invis_targs.pop()
+                self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
         event = self.register.step(direction, grab)
@@ -883,9 +912,12 @@ class VisNutsController(EvenLineMatchController):
             self.targ = self.invis_targs.pop()
             self.targ.color = COLORS[TARG]
         elif len(self.invis_targs) > 0:
-            self.flashed_targs.append(self.targ)
-            self.targ = self.invis_targs.pop()
-            self.targ.color = COLORS[TARG]
+            if self.rand_timing and np.random.random()>self.timing_p:
+                self.n_steps -= 1
+            else:
+                self.flashed_targs.append(self.targ)
+                self.targ = self.invis_targs.pop()
+                self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
         event = self.register.step(direction, grab)

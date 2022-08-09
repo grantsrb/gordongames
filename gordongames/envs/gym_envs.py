@@ -27,6 +27,8 @@ class GordonGame(gym.Env):
                  max_steps=None,
                  hold_outs=set(),
                  rand_pdb=True,
+                 rand_timing=False,
+                 timing_p=0.8,
                  *args, **kwargs):
         """
         Args:
@@ -47,6 +49,18 @@ class GordonGame(gym.Env):
                 if true, the player, dispenser, and button are randomly
                 placed along the topmost row at the beginning of the
                 game.
+            rand_timing: bool
+                if true, the number of frames after each pixel reveal
+                is uniformly selected from 1-2 frames. This forces the
+                numeric signal to be derived from the number of pixels
+                rather than the number of frames.
+            timing_p: float between 0 and 1
+                the probability of displaying the next target item. the
+                animation phase continues until all targets are
+                displayed but with probability 1-timing_p no new targets
+                are displayed for any given step in the animation phase.
+                This is used to discourage the model from counting the
+                number of frames rather than the items.
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -66,6 +80,8 @@ class GordonGame(gym.Env):
         if hold_outs is None: hold_outs = set()
         self.hold_outs = set(hold_outs)
         self.rand_pdb = rand_pdb
+        self.rand_timing = rand_timing
+        self.timing_p = timing_p
         self.viewer = None
         self.action_space = Discrete(6)
         self.is_grabbing = False
@@ -237,7 +253,9 @@ class EvenLineMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -263,7 +281,9 @@ class ClusterMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -287,7 +307,9 @@ class OrthogonalLineMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -309,7 +331,9 @@ class UnevenLineMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -334,7 +358,9 @@ class ReverseClusterMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -359,7 +385,9 @@ class ClusterClusterMatch(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -388,7 +416,9 @@ class BriefPresentation(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -410,7 +440,9 @@ class NavigationTask(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -474,7 +506,9 @@ class NutsInCan(GordonGame):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -596,7 +630,9 @@ class VisNuts(NutsInCan):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -639,7 +675,9 @@ class StaticVisNuts(NutsInCan):
             harsh=self.harsh,
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p
         )
         self.controller.rand = self.rand
         self.controller.reset()

@@ -161,11 +161,13 @@ The agent receives a +1 reward if the agent removes the exact number of items pl
 
 #### Game Options
 
-- `grid_size` - An row,col coordinate denoting the number of units on the grid (height, width).
-- `pixel_density` - Number of numpy pixels within a single grid unit.
-- `targ_range` - A range of possible initial target object counts for each game (inclusive). Must be less than `grid_size`. 
--  hold\_outs  - a set or list of target counts that should not be considered when creating a new game
--  rand\_pdb  - if true, the player, dispenser (aka pile), and ending button are randomly distributed along the top row at the beginning of the game. Otherwise they are deterministically set.
+- `grid_size`: tuple of ints - A row,col coordinate denoting the number of units on the grid (height, width).
+- `pixel_density`: int - Number of numpy pixels within a single grid unit.
+- `targ_range`: tuple of ints - A range of possible initial target object counts for each game (inclusive). Must be less than `grid_size`. 
+- `hold_outs`: set of ints  - a set or list of target counts that should not be considered when creating a new game
+- `rand_pdb`: bool - if true, the player, dispenser (aka pile), and ending button are randomly distributed along the top row at the beginning of the game. Otherwise they are deterministically set.
+- `rand_timing`: bool - if true, the timing of the initial display phase is stochastic so that the agent cannot simply count the number of frames rather than the number of target items.
+- `timing_p`: float between 0 and 1 - the probability of an animation step displaying the next target object. A value of 1 means the agent could count the number of frames instead of the number of target items. A value of 0 will not allow the game to progress past the animation phase.
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 
