@@ -756,15 +756,17 @@ class Register:
 
         Args:
             rand_locs: bool
-                if true, places the player, pile, and button evenly
-                spaced along the top row of the grid in that order.
-                Otherwise they are randomly placed in any order.
+                if false, consistently places the pile and button
+                along the top row of the grid with the player on top
+                of the pile.
+                Otherwise each the player, pile, and button are
+                randomly placed in any order along the top row.
         """
         if rand_locs:
             cols = self.rand.permutation(self.grid.shape[1])
         else:
             cols = Register.even_spacing(self.grid.shape[1], 3)
-            cols[0] = cols[1]-1
+            cols[0] = cols[1]
         self.move_object(self.player, (0, int(cols[0])))
         self.move_object(self.pile,   (0, int(cols[1])))
         self.move_object(self.button, (0, int(cols[2])))
