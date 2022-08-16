@@ -10,7 +10,7 @@ import time
 if __name__=="__main__":
     render = True
     n_episodes = 3
-    delay = 1
+    delay = 0
 
     kwargs = {
         "targ_range": (1,5),
@@ -20,8 +20,9 @@ if __name__=="__main__":
         "seed": int(time.time()),
         "harsh": True,
         "max_steps": None,
-        "rand_pdb": False,
-        "rand_timing": True,
+        "rand_pdb": True,
+        "player_on_pile": False,
+        "rand_timing": False,
         "timing_p": 0.8,
     }
     env_names = [
@@ -34,7 +35,7 @@ if __name__=="__main__":
         #"gordongames-v6",
         #"gordongames-v7",
         "gordongames-v8",
-        "gordongames-v9",
+        #"gordongames-v9",
         "gordongames-v10",
     ]
     start_time = time.time()
