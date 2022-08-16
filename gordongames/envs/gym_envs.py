@@ -27,6 +27,7 @@ class GordonGame(gym.Env):
                  max_steps=None,
                  hold_outs=set(),
                  rand_pdb=True,
+                 player_on_pile=False,
                  rand_timing=False,
                  timing_p=0.8,
                  *args, **kwargs):
@@ -49,6 +50,9 @@ class GordonGame(gym.Env):
                 if true, the player, dispenser, and button are randomly
                 placed along the topmost row at the beginning of the
                 game.
+            player_on_pile: bool
+                if true, the player always starts on top of the dispenser
+                pile in counting games. If false, it may or may not.
             rand_timing: bool
                 if true, the number of frames after each pixel reveal
                 is uniformly selected from 1-2 frames. This forces the
@@ -80,6 +84,7 @@ class GordonGame(gym.Env):
         if hold_outs is None: hold_outs = set()
         self.hold_outs = set(hold_outs)
         self.rand_pdb = rand_pdb
+        self.player_on_pile = player_on_pile
         self.rand_timing = rand_timing
         self.timing_p = timing_p
         self.viewer = None
@@ -254,6 +259,7 @@ class EvenLineMatch(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -282,6 +288,7 @@ class ClusterMatch(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -308,6 +315,7 @@ class OrthogonalLineMatch(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -332,6 +340,7 @@ class UnevenLineMatch(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -359,6 +368,7 @@ class ReverseClusterMatch(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -386,6 +396,7 @@ class ClusterClusterMatch(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -417,6 +428,7 @@ class BriefPresentation(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -441,6 +453,7 @@ class NavigationTask(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -507,6 +520,7 @@ class NutsInCan(GordonGame):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -631,6 +645,7 @@ class VisNuts(NutsInCan):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )
@@ -676,6 +691,7 @@ class StaticVisNuts(NutsInCan):
             targ_range=self.targ_range,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p
         )

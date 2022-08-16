@@ -749,7 +749,8 @@ class Register:
         self.display_targs = False
         self.draw_register()
 
-    def place_player_pile_button(self, rand_locs=True):
+    def place_player_pile_button(self, rand_locs=True,
+                                       player_on_pile=False):
         """
         Places the pile, button, and player randomly or evenly along
         the top row of the grid.
@@ -761,11 +762,17 @@ class Register:
                 of the pile.
                 Otherwise each the player, pile, and button are
                 randomly placed in any order along the top row.
+            player_on_pile: bool
+                if true, the player always starts on top of the dispenser
+                pile in counting games. If false, it may or may not.
         """
         if rand_locs:
             cols = self.rand.permutation(self.grid.shape[1])
         else:
             cols = Register.even_spacing(self.grid.shape[1], 3)
+            if np.random.random() >= .5:
+                cols[0],cols[2] = cols[2],cols[0]
+        if player_on_pile:
             cols[0] = cols[1]
         self.move_object(self.player, (0, int(cols[0])))
         self.move_object(self.pile,   (0, int(cols[1])))
@@ -929,7 +936,7 @@ class Register:
         self.rand_targ_placement()
         self.draw_register()
 
-    def even_line_match(self, rand_pdb=True):
+    def even_line_match(self, rand_pdb=True, player_on_pile=False):
         """
         Initialization function for the line match game A.
 
@@ -942,13 +949,18 @@ class Register:
                 placed along the topmost row at the beginning of each
                 episode. Otherwise, they are placed evenly spaced in the
                 order player, dispenser, button from left to right.
+            player_on_pile: bool
+                if true, the player always starts on top of the dispenser
+                pile in counting games. If false, it may or may not.
         """
         # each is randomly placed in the top row of the grid
-        self.place_player_pile_button(rand_pdb) 
+        self.place_player_pile_button(rand_pdb, player_on_pile)
         self.even_targ_spacing()
         self.draw_register()
 
-    def cluster_match(self, reserved_coords=set(), rand_pdb=True):
+    def cluster_match(self, reserved_coords=set(),
+                            rand_pdb=True,
+                            player_on_pile=False):
         """
         Intialization function for the Cluster Match game B.
 
@@ -965,12 +977,15 @@ class Register:
                 placed along the topmost row at the beginning of each
                 episode. Otherwise, they are placed evenly spaced in the
                 order player, dispenser, button from left to right.
+            player_on_pile: bool
+                if true, the player always starts on top of the dispenser
+                pile in counting games. If false, it may or may not.
         """
-        self.place_player_pile_button(rand_pdb) 
+        self.place_player_pile_button(rand_pdb, player_on_pile)
         self.rand_targ_placement(reserved_coords=reserved_coords)
         self.draw_register()
 
-    def orthogonal_line_match(self, rand_pdb=True):
+    def orthogonal_line_match(self, rand_pdb=True, player_on_pile=False):
         """
         Initialization function for the orthogonal line match game C.
 
@@ -983,12 +998,15 @@ class Register:
                 placed along the topmost row at the beginning of each
                 episode. Otherwise, they are placed evenly spaced in the
                 order player, dispenser, button from left to right.
+            player_on_pile: bool
+                if true, the player always starts on top of the dispenser
+                pile in counting games. If false, it may or may not.
         """
-        self.place_player_pile_button(rand_pdb)
+        self.place_player_pile_button(rand_pdb, player_on_pile)
         self.vertical_targ_spacing()
         self.draw_register()
 
-    def uneven_line_match(self, rand_pdb=True):
+    def uneven_line_match(self, rand_pdb=True, player_on_pile=False):
         """
         Initialization function for the uneven line match game D.
 
@@ -1001,8 +1019,11 @@ class Register:
                 placed along the topmost row at the beginning of each
                 episode. Otherwise, they are placed evenly spaced in the
                 order player, dispenser, button from left to right.
+            player_on_pile: bool
+                if true, the player always starts on top of the dispenser
+                pile in counting games. If false, it may or may not.
         """
-        self.place_player_pile_button(rand_pdb)
+        self.place_player_pile_button(rand_pdb, player_on_pile)
         self.uneven_targ_spacing()
         self.draw_register()
 

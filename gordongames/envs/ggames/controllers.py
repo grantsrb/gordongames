@@ -22,6 +22,7 @@ class Controller:
                  pixel_density: int=1,
                  hold_outs: set=set(),
                  rand_pdb: bool=True,
+                 player_on_pile: bool=False,
                  rand_timing: bool=False,
                  timing_p: float=0.8,
                  *args, **kwargs):
@@ -37,6 +38,9 @@ class Controller:
         hold_outs: set of ints
             a set of integer values representing numbers of targets
             that should not be sampled when sampling targets
+        player_on_pile: bool
+            if true, the player always starts on top of the dispenser
+            pile in counting games. If false, it may or may not.
         rand_pdb: bool
             if true, the player, dispenser, and button are randomly
             placed along the topmost row at the beginning of each
@@ -62,6 +66,7 @@ class Controller:
         self._pixel_density = pixel_density
         self._hold_outs = set(hold_outs)
         self.rand_pdb = rand_pdb
+        self.player_on_pile = player_on_pile
         self.rand_timing = rand_timing
         self.timing_p = timing_p
         trgs = set(range(targ_range[0],targ_range[1]+1))
@@ -216,7 +221,7 @@ class NavigationTaskController(Controller):
         a new episode.
         """
         self.init_variables(n_targs)
-        self.register.navigation_task(self.rand_pdb)
+        self.register.navigation_task(self.rand_pdb, self.player_on_pile)
         self.register.make_signal()
         return self.grid.grid
 
@@ -372,7 +377,10 @@ class EvenLineMatchController(Controller):
         a new episode.
         """
         self.init_variables(n_targs)
-        self.register.even_line_match(rand_pdb=self.rand_pdb)
+        self.register.even_line_match(
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile
+        )
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -435,7 +443,10 @@ class ClusterMatchController(EvenLineMatchController):
         for the agent to count the targets on the grid.
         """
         self.init_variables(n_targs)
-        self.register.cluster_match(rand_pdb=self.rand_pdb)
+        self.register.cluster_match(
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile
+        )
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -600,7 +611,10 @@ class UnevenLineMatchController(EvenLineMatchController):
         """
         self.init_variables(n_targs)
         # randomizes object placement on grid
-        self.register.uneven_line_match(rand_pdb=self.rand_pdb)
+        self.register.uneven_line_match(
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile
+        )
         return self.grid.grid
 
 class OrthogonalLineMatchController(ClusterMatchController):
@@ -618,7 +632,10 @@ class OrthogonalLineMatchController(ClusterMatchController):
         """
         self.init_variables(n_targs)
         # randomizes object placement on grid
-        self.register.orthogonal_line_match(rand_pdb=self.rand_pdb)
+        self.register.orthogonal_line_match(
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile
+        )
         return self.grid.grid
 
 class BriefPresentationController(ClusterMatchController):
@@ -728,7 +745,10 @@ class NutsInCanController(EvenLineMatchController):
 
         # randomize object placement on grid, only display one target
         # for first frame. invis_targs is a set
-        self.register.cluster_match(rand_pdb=self.rand_pdb)
+        self.register.cluster_match(
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile
+        )
         self.invis_targs = self.register.targs
         self.targ = None
         for targ in self.invis_targs:
@@ -858,7 +878,8 @@ class VisNutsController(EvenLineMatchController):
         # for first frame. invis_targs is a set
         self.register.cluster_match(
             {self.register.get_signal_coord()},
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile
         )
         self.invis_targs = self.register.targs
         self.targ = None
@@ -987,7 +1008,8 @@ class StaticVisNutsController(VisNutsController):
         # for first frame. invis_targs is a set
         self.register.cluster_match(
             {self.register.get_signal_coord()},
-            rand_pdb=self.rand_pdb
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile
         )
         self.invis_targs = self.register.targs
         self.targ = None
