@@ -27,7 +27,7 @@ class GordonGame(gym.Env):
                  max_steps=None,
                  hold_outs=set(),
                  rand_pdb=True,
-                 player_on_pile=False,
+                 player_on_pile=True,
                  rand_timing=False,
                  timing_p=0.8,
                  *args, **kwargs):
