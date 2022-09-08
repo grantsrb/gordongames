@@ -1,6 +1,7 @@
 import os, subprocess, time, signal
 import gym
-from gordongames.envs.ggames import Discrete
+import gym.spaces as spaces
+#from gordongames.envs.ggames import Discrete
 from gordongames.envs.ggames.controllers import *
 from gordongames.envs.ggames.constants import GRAB, STAY, ITEM, TARG, PLAYER, PILE, BUTTON, OBJECT_TYPES
 from gordongames.envs.ggames.utils import find_empty_space_along_row
@@ -88,10 +89,18 @@ class GordonGame(gym.Env):
         self.rand_timing = rand_timing
         self.timing_p = timing_p
         self.viewer = None
-        self.action_space = Discrete(6)
+        self.action_space = spaces.Discrete(6)
         self.is_grabbing = False
         self.seed(int(time.time()))
         self.set_controller()
+        obs = np.zeros(
+            [g*self.pixel_density for g in self.grid_size],
+            dtype=np.float32
+        )
+        self.observation_space = spaces.Box(
+            low=obs+np.min(list(COLORS.values())),
+            high=obs+np.max(list(COLORS.values()))
+        )
 
     def set_controller(self):
         """
@@ -220,7 +229,7 @@ class GordonGame(gym.Env):
         self.is_grabbing = False
         self.step_count = 0
         self.last_obs = self.controller.grid.grid
-        return self.last_obs
+        return self.last_obs, {}
 
     def render(self, mode='human', close=False, frame_speed=.1):
         if self.viewer is None:
