@@ -750,7 +750,8 @@ class Register:
         self.draw_register()
 
     def place_player_pile_button(self, rand_locs=True,
-                                       player_on_pile=False):
+                                       player_on_pile=False,
+                                       spacing_limit=None):
         """
         Places the pile, button, and player randomly or evenly along
         the top row of the grid.
@@ -765,11 +766,31 @@ class Register:
             player_on_pile: bool
                 if true, the player always starts on top of the dispenser
                 pile in counting games. If false, it may or may not.
+            spacing_limit: None or int greater than 0
+                if greater than 0, limits the spacing between the
+                player, dispenser, and ending button to be within
+                spacing_limit steps on either side of the dispenser's
+                initial position. If rand_locs is false, the ending
+                button will always be spacing_limit steps away
         """
         if rand_locs:
-            cols = self.rand.permutation(self.grid.shape[1])
+            if spacing_limit is None or spacing_limit<=0:
+                cols = self.rand.permutation(self.grid.shape[1])
+            else:
+                col = self.rand.integers(
+                    low=spacing_limit,
+                    high=self.grid.shape[1]-spacing_limit,
+                )
+                cols = np.arange( col-spacing_limit, col+spacing_limit)
+                cols[-spacing_limit:] += 1
+                cols = self.rand.choice( cols, size=2, replace=False )
+                cols = [cols[0], col, cols[1]]
         else:
-            cols = Register.even_spacing(self.grid.shape[1], 3)
+            if spacing_limit is None or spacing_limit<=0:
+                cols = Register.even_spacing(self.grid.shape[1], 3)
+            else:
+                cols[0] = cols[1]-spacing_limit
+                cols[2] = cols[1]+spacing_limit
             if np.random.random() >= .5:
                 cols[0],cols[2] = cols[2],cols[0]
         if player_on_pile:
@@ -786,7 +807,11 @@ class Register:
             self.make_object(obj_type=ITEM, coord=(0,0))
         objs = [*(self.obj_register-self._targs)]
         s = len(objs)
-        cols = self.rand.integers(low=0,high=self.grid.shape[1],size=s)
+        cols = self.rand.integers(
+            low=0,
+            high=self.grid.shape[1],
+            size=s
+        )
         obj_order = [int(x) for x in self.rand.permutation(s)]
         if self.grid.is_divided: high = self.grid.middle_row
         else: high = self.grid.shape[0]
@@ -794,8 +819,16 @@ class Register:
         for i in obj_order:
             row = self.rand.integers(0,high)
             coord = (row,cols[i])
+            n_loops = 0
             while coord is None or not self.is_empty(coord) or\
                                                coord in coords:
+                n_loops += 1
+                if n_loops > 50:
+                    n_loops = 0
+                    cols[i] = self.rand.integers(
+                        low=0,
+                        high=self.grid.shape[1]
+                    )
                 row = self.rand.integers(0,high)
                 coord = (row,cols[i])
             coords.add(coord)
@@ -936,7 +969,8 @@ class Register:
         self.rand_targ_placement()
         self.draw_register()
 
-    def even_line_match(self, rand_pdb=True, player_on_pile=False):
+    def even_line_match(self, rand_pdb=True, player_on_pile=False,
+                                             spacing_limit=None):
         """
         Initialization function for the line match game A.
 
@@ -952,15 +986,26 @@ class Register:
             player_on_pile: bool
                 if true, the player always starts on top of the dispenser
                 pile in counting games. If false, it may or may not.
+            spacing_limit: None or int greater than 0
+                if greater than 0, limits the spacing between the
+                player, dispenser, and ending button to be within
+                spacing_limit steps on either side of the dispenser's
+                initial position. If rand_locs is false, the ending
+                button will always be spacing_limit steps away
         """
         # each is randomly placed in the top row of the grid
-        self.place_player_pile_button(rand_pdb, player_on_pile)
+        self.place_player_pile_button(
+            rand_pdb,
+            player_on_pile,
+            spacing_limit
+        )
         self.even_targ_spacing()
         self.draw_register()
 
     def cluster_match(self, reserved_coords=set(),
                             rand_pdb=True,
-                            player_on_pile=False):
+                            player_on_pile=False,
+                            spacing_limit=None):
         """
         Intialization function for the Cluster Match game B.
 
@@ -980,12 +1025,24 @@ class Register:
             player_on_pile: bool
                 if true, the player always starts on top of the dispenser
                 pile in counting games. If false, it may or may not.
+            spacing_limit: None or int greater than 0
+                if greater than 0, limits the spacing between the
+                player, dispenser, and ending button to be within
+                spacing_limit steps on either side of the dispenser's
+                initial position. If rand_locs is false, the ending
+                button will always be spacing_limit steps away
         """
-        self.place_player_pile_button(rand_pdb, player_on_pile)
+        self.place_player_pile_button(
+            rand_pdb,
+            player_on_pile,
+            spacing_limit
+        )
         self.rand_targ_placement(reserved_coords=reserved_coords)
         self.draw_register()
 
-    def orthogonal_line_match(self, rand_pdb=True, player_on_pile=False):
+    def orthogonal_line_match(self, rand_pdb=True,
+                                    player_on_pile=False,
+                                    spacing_limit=None):
         """
         Initialization function for the orthogonal line match game C.
 
@@ -1001,12 +1058,23 @@ class Register:
             player_on_pile: bool
                 if true, the player always starts on top of the dispenser
                 pile in counting games. If false, it may or may not.
+            spacing_limit: None or int greater than 0
+                if greater than 0, limits the spacing between the
+                player, dispenser, and ending button to be within
+                spacing_limit steps on either side of the dispenser's
+                initial position. If rand_locs is false, the ending
+                button will always be spacing_limit steps away
         """
-        self.place_player_pile_button(rand_pdb, player_on_pile)
+        self.place_player_pile_button(
+            rand_pdb,
+            player_on_pile,
+            spacing_limit
+        )
         self.vertical_targ_spacing()
         self.draw_register()
 
-    def uneven_line_match(self, rand_pdb=True, player_on_pile=False):
+    def uneven_line_match(self, rand_pdb=True, player_on_pile=False,
+                                               spacing_limit=None):
         """
         Initialization function for the uneven line match game D.
 
@@ -1022,8 +1090,18 @@ class Register:
             player_on_pile: bool
                 if true, the player always starts on top of the dispenser
                 pile in counting games. If false, it may or may not.
+            spacing_limit: None or int greater than 0
+                if greater than 0, limits the spacing between the
+                player, dispenser, and ending button to be within
+                spacing_limit steps on either side of the dispenser's
+                initial position. If rand_locs is false, the ending
+                button will always be spacing_limit steps away
         """
-        self.place_player_pile_button(rand_pdb, player_on_pile)
+        self.place_player_pile_button(
+            rand_pdb,
+            player_on_pile,
+            spacing_limit
+        )
         self.uneven_targ_spacing()
         self.draw_register()
 

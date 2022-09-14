@@ -31,6 +31,7 @@ class GordonGame(gym.Env):
                  player_on_pile=True,
                  rand_timing=False,
                  timing_p=0.8,
+                 spacing_limit=None,
                  *args, **kwargs):
         """
         Args:
@@ -50,7 +51,7 @@ class GordonGame(gym.Env):
             rand_pdb: bool
                 if true, the player, dispenser, and button are randomly
                 placed along the topmost row at the beginning of the
-                game.
+                game. Otherwise they are placed
             player_on_pile: bool
                 if true, the player always starts on top of the dispenser
                 pile in counting games. If false, it may or may not.
@@ -66,6 +67,12 @@ class GordonGame(gym.Env):
                 are displayed for any given step in the animation phase.
                 This is used to discourage the model from counting the
                 number of frames rather than the items.
+            spacing_limit: None or int greater than 0
+                if greater than 0, limits the spacing between the
+                player, dispenser, and ending button to be within
+                spacing_limit steps on either side of the dispenser's
+                initial position. If rand_locs is false, the ending
+                button will always be spacing_limit steps away
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -88,6 +95,7 @@ class GordonGame(gym.Env):
         self.player_on_pile = player_on_pile
         self.rand_timing = rand_timing
         self.timing_p = timing_p
+        self.spacing_limit = spacing_limit
         self.viewer = None
         self.action_space = spaces.Discrete(6)
         self.is_grabbing = False
@@ -270,7 +278,8 @@ class EvenLineMatch(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -299,7 +308,8 @@ class ClusterMatch(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -326,7 +336,8 @@ class OrthogonalLineMatch(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -351,7 +362,8 @@ class UnevenLineMatch(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -379,7 +391,8 @@ class ReverseClusterMatch(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -407,7 +420,8 @@ class ClusterClusterMatch(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -439,7 +453,8 @@ class BriefPresentation(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -464,7 +479,8 @@ class NavigationTask(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -531,7 +547,8 @@ class NutsInCan(GordonGame):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -656,7 +673,8 @@ class VisNuts(NutsInCan):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()
@@ -702,7 +720,8 @@ class StaticVisNuts(NutsInCan):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
-            timing_p=self.timing_p
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
         )
         self.controller.rand = self.rand
         self.controller.reset()

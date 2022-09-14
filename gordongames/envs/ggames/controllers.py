@@ -23,6 +23,7 @@ class Controller:
                  hold_outs: set=set(),
                  rand_pdb: bool=True,
                  player_on_pile: bool=False,
+                 spacing_limit=None,
                  rand_timing: bool=False,
                  timing_p: float=0.8,
                  *args, **kwargs):
@@ -41,6 +42,12 @@ class Controller:
         player_on_pile: bool
             if true, the player always starts on top of the dispenser
             pile in counting games. If false, it may or may not.
+        spacing_limit: None or int greater than 0
+            if greater than 0, limits the spacing between the
+            player, dispenser, and ending button to be within
+            spacing_limit steps on either side of the dispenser's
+            initial position. If rand_locs is false, the ending
+            button will always be spacing_limit steps away
         rand_pdb: bool
             if true, the player, dispenser, and button are randomly
             placed along the topmost row at the beginning of each
@@ -67,6 +74,7 @@ class Controller:
         self._hold_outs = set(hold_outs)
         self.rand_pdb = rand_pdb
         self.player_on_pile = player_on_pile
+        self.spacing_limit = spacing_limit
         self.rand_timing = rand_timing
         self.timing_p = timing_p
         trgs = set(range(targ_range[0],targ_range[1]+1))
@@ -221,7 +229,11 @@ class NavigationTaskController(Controller):
         a new episode.
         """
         self.init_variables(n_targs)
-        self.register.navigation_task(self.rand_pdb, self.player_on_pile)
+        self.register.navigation_task(
+            self.rand_pdb,
+            self.player_on_pile,
+            self.spacing_limit
+        )
         self.register.make_signal()
         return self.grid.grid
 
@@ -379,7 +391,8 @@ class EvenLineMatchController(Controller):
         self.init_variables(n_targs)
         self.register.even_line_match(
             rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit
         )
         return self.grid.grid
 
@@ -445,7 +458,8 @@ class ClusterMatchController(EvenLineMatchController):
         self.init_variables(n_targs)
         self.register.cluster_match(
             rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit
         )
         return self.grid.grid
 
@@ -613,7 +627,8 @@ class UnevenLineMatchController(EvenLineMatchController):
         # randomizes object placement on grid
         self.register.uneven_line_match(
             rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit
         )
         return self.grid.grid
 
@@ -634,7 +649,8 @@ class OrthogonalLineMatchController(ClusterMatchController):
         # randomizes object placement on grid
         self.register.orthogonal_line_match(
             rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit
         )
         return self.grid.grid
 
@@ -747,7 +763,8 @@ class NutsInCanController(EvenLineMatchController):
         # for first frame. invis_targs is a set
         self.register.cluster_match(
             rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit
         )
         self.invis_targs = self.register.targs
         self.targ = None
@@ -879,7 +896,8 @@ class VisNutsController(EvenLineMatchController):
         self.register.cluster_match(
             {self.register.get_signal_coord()},
             rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit
         )
         self.invis_targs = self.register.targs
         self.targ = None
@@ -1009,7 +1027,8 @@ class StaticVisNutsController(VisNutsController):
         self.register.cluster_match(
             {self.register.get_signal_coord()},
             rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit
         )
         self.invis_targs = self.register.targs
         self.targ = None
