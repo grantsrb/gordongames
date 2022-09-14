@@ -786,9 +786,8 @@ class Register:
                 cols = self.rand.choice( cols, size=2, replace=False )
                 cols = [cols[0], col, cols[1]]
         else:
-            if spacing_limit is None or spacing_limit<=0:
-                cols = Register.even_spacing(self.grid.shape[1], 3)
-            else:
+            cols = Register.even_spacing(self.grid.shape[1], 3)
+            if not(spacing_limit is None or spacing_limit<=0):
                 cols[0] = cols[1]-spacing_limit
                 cols[2] = cols[1]+spacing_limit
             if np.random.random() >= .5:
