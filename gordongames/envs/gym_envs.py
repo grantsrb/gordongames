@@ -32,6 +32,7 @@ class GordonGame(gym.Env):
                  rand_timing=False,
                  timing_p=0.8,
                  spacing_limit=None,
+                 zipf_exponent=None,
                  *args, **kwargs):
         """
         Args:
@@ -73,6 +74,12 @@ class GordonGame(gym.Env):
                 spacing_limit steps on either side of the dispenser's
                 initial position. If rand_locs is false, the ending
                 button will always be spacing_limit steps away
+            zipf_exponent: float or None
+                if not None, the target quantities are sampled
+                proportionally to the zipfian distribution with the
+                argued exponent. p = 1/(n^z) where n is the target
+                quantity, z is the zipfian exponent and p is the
+                likelihood.
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -96,6 +103,7 @@ class GordonGame(gym.Env):
         self.rand_timing = rand_timing
         self.timing_p = timing_p
         self.spacing_limit = spacing_limit
+        self.zipf_exponent = zipf_exponent
         self.viewer = None
         self.action_space = spaces.Discrete(6)
         self.is_grabbing = False
@@ -274,6 +282,7 @@ class EvenLineMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -304,6 +313,7 @@ class ClusterMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -332,6 +342,7 @@ class OrthogonalLineMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -358,6 +369,7 @@ class UnevenLineMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -387,6 +399,7 @@ class ReverseClusterMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -416,6 +429,7 @@ class ClusterClusterMatch(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -449,6 +463,7 @@ class BriefPresentation(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -475,6 +490,7 @@ class NavigationTask(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -543,6 +559,7 @@ class NutsInCan(GordonGame):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -669,6 +686,7 @@ class VisNuts(NutsInCan):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
@@ -716,6 +734,7 @@ class StaticVisNuts(NutsInCan):
             pixel_density=self.pixel_density,
             harsh=self.harsh,
             targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,

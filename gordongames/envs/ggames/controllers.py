@@ -1,7 +1,7 @@
 from gordongames.envs.ggames.grid import Grid
 from gordongames.envs.ggames.registry import Register
 from gordongames.envs.ggames.constants import *
-from gordongames.envs.ggames.utils import get_rows_and_cols, get_aligned_items, get_max_row
+from gordongames.envs.ggames.utils import get_rows_and_cols, get_aligned_items, get_max_row, zipfian
 import numpy as np
 import time
 
@@ -26,6 +26,7 @@ class Controller:
                  spacing_limit=None,
                  rand_timing: bool=False,
                  timing_p: float=0.8,
+                 zipf_exponent=None,
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)
@@ -63,6 +64,12 @@ class Controller:
             for any given step in the animation phase. This is used
             to discourage the model from counting the number of frames
             rather than the items.
+        zipf_exponent: float or None
+            if not None, the target quantities are sampled
+            proportionally to the zipfian distribution with the
+            argued exponent. p = 1/(n^z) where n is the target
+            quantity, z is the zipfian exponent and p is the
+            likelihood.
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -75,6 +82,7 @@ class Controller:
         self.rand_pdb = rand_pdb
         self.player_on_pile = player_on_pile
         self.spacing_limit = spacing_limit
+        self.zipf_exponent = zipf_exponent
         self.rand_timing = rand_timing
         self.timing_p = timing_p
         trgs = set(range(targ_range[0],targ_range[1]+1))
@@ -374,9 +382,13 @@ class EvenLineMatchController(Controller):
         self.n_steps = 0
         if n_targs is None:
             low, high = self.targ_range
-            n_targs = self.rand.integers(low, high+1)
-            while n_targs in self.hold_outs:
-                n_targs = self.rand.integers(low, high+1)
+            sampler = lambda: self.rand.integers(low,high+1)
+            if self.zipf_exponent is not None:
+                sampler = lambda: zipfian(
+                    low, high, self.zipf_exponent, rand=self.rand
+                )
+            n_targs = sampler()
+            while n_targs in self.hold_outs: n_targs = sampler()
         elif n_targs in self.hold_outs:
             print("Overriding holds outs using", n_targs, "targs")
         # wipes items from grid and makes/deletes targs

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import time
 
 if __name__=="__main__":
-    render = True
+    render = False
     n_episodes = 3
     delay = 0
 
@@ -24,18 +24,19 @@ if __name__=="__main__":
         "player_on_pile": False,
         "rand_timing": False,
         "timing_p": 0.8,
+        "spacing_limit": 1,
     }
     env_names = [
-        #"gordongames-v0",
-        #"gordongames-v1",
-        #"gordongames-v2",
-        #"gordongames-v3",
+        "gordongames-v0",
+        "gordongames-v1",
+        "gordongames-v2",
+        "gordongames-v3",
         "gordongames-v4",
-        #"gordongames-v5",
-        #"gordongames-v6",
-        #"gordongames-v7",
+        "gordongames-v5",
+        "gordongames-v6",
+        "gordongames-v7",
         "gordongames-v8",
-        #"gordongames-v9",
+        "gordongames-v9",
         "gordongames-v10",
     ]
     start_time = time.time()
