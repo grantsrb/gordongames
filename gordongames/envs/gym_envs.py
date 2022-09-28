@@ -28,6 +28,7 @@ class GordonGame(gym.Env):
                  max_steps=None,
                  hold_outs=set(),
                  rand_pdb=True,
+                 sym_distr=True,
                  player_on_pile=True,
                  rand_timing=False,
                  timing_p=0.8,
@@ -53,6 +54,12 @@ class GordonGame(gym.Env):
                 if true, the player, dispenser, and button are randomly
                 placed along the topmost row at the beginning of the
                 game. Otherwise they are placed
+            sym_distr: bool
+                if false and rand_pdb is false, the player, dispenser,
+                and button are consistently distributed the same way
+                at initialization on every episode. Otherwise the initial
+                distribution is reflected about the yaxis with 50% prob.
+                Only applies when rand_pdb is false.
             player_on_pile: bool
                 if true, the player always starts on top of the dispenser
                 pile in counting games. If false, it may or may not.
@@ -99,6 +106,7 @@ class GordonGame(gym.Env):
         if hold_outs is None: hold_outs = set()
         self.hold_outs = set(hold_outs)
         self.rand_pdb = rand_pdb
+        self.sym_distr = sym_distr
         self.player_on_pile = player_on_pile
         self.rand_timing = rand_timing
         self.timing_p = timing_p
@@ -285,6 +293,7 @@ class EvenLineMatch(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -316,6 +325,7 @@ class ClusterMatch(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -345,6 +355,7 @@ class OrthogonalLineMatch(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -372,6 +383,7 @@ class UnevenLineMatch(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -402,6 +414,7 @@ class ReverseClusterMatch(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -432,6 +445,7 @@ class ClusterClusterMatch(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -466,6 +480,7 @@ class BriefPresentation(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -493,6 +508,7 @@ class NavigationTask(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -562,6 +578,7 @@ class NutsInCan(GordonGame):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -689,6 +706,7 @@ class VisNuts(NutsInCan):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,
@@ -737,6 +755,7 @@ class StaticVisNuts(NutsInCan):
             zipf_exponent=self.zipf_exponent,
             hold_outs=self.hold_outs,
             rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
             player_on_pile=self.player_on_pile,
             rand_timing=self.rand_timing,
             timing_p=self.timing_p,

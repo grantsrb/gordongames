@@ -751,7 +751,8 @@ class Register:
 
     def place_player_pile_button(self, rand_locs=True,
                                        player_on_pile=False,
-                                       spacing_limit=None):
+                                       spacing_limit=None,
+                                       sym_distr=True):
         """
         Places the pile, button, and player randomly or evenly along
         the top row of the grid.
@@ -772,6 +773,12 @@ class Register:
                 spacing_limit steps on either side of the dispenser's
                 initial position. If rand_locs is false, the ending
                 button will always be spacing_limit steps away
+            sym_distr: bool
+                if false and rand_pdb is false, the player, dispenser,
+                and button are consistently distributed the same way
+                at initialization on every episode. Otherwise the initial
+                distribution is reflected about the yaxis with 50% prob.
+                Only applies when rand_pdb is false.
         """
         if rand_locs:
             if spacing_limit is None or spacing_limit<=0:
@@ -790,7 +797,7 @@ class Register:
             if not(spacing_limit is None or spacing_limit<=0):
                 cols[0] = cols[1]-spacing_limit
                 cols[2] = cols[1]+spacing_limit
-            if np.random.random() >= .5:
+            if sym_distr and np.random.random() >= .5:
                 cols[0],cols[2] = cols[2],cols[0]
         if player_on_pile:
             cols[0] = cols[1]
@@ -969,7 +976,8 @@ class Register:
         self.draw_register()
 
     def even_line_match(self, rand_pdb=True, player_on_pile=False,
-                                             spacing_limit=None):
+                                             spacing_limit=None,
+                                             sym_distr=True):
         """
         Initialization function for the line match game A.
 
@@ -991,12 +999,19 @@ class Register:
                 spacing_limit steps on either side of the dispenser's
                 initial position. If rand_locs is false, the ending
                 button will always be spacing_limit steps away
+            sym_distr: bool
+                if false and rand_pdb is false, the player, dispenser,
+                and button are consistently distributed the same way
+                at initialization on every episode. Otherwise the initial
+                distribution is reflected about the yaxis with 50% prob.
+                Only applies when rand_pdb is false.
         """
         # each is randomly placed in the top row of the grid
         self.place_player_pile_button(
             rand_pdb,
             player_on_pile,
-            spacing_limit
+            spacing_limit,
+            sym_distr
         )
         self.even_targ_spacing()
         self.draw_register()
@@ -1004,7 +1019,8 @@ class Register:
     def cluster_match(self, reserved_coords=set(),
                             rand_pdb=True,
                             player_on_pile=False,
-                            spacing_limit=None):
+                            spacing_limit=None,
+                            sym_distr=True):
         """
         Intialization function for the Cluster Match game B.
 
@@ -1030,18 +1046,26 @@ class Register:
                 spacing_limit steps on either side of the dispenser's
                 initial position. If rand_locs is false, the ending
                 button will always be spacing_limit steps away
+            sym_distr: bool
+                if false and rand_pdb is false, the player, dispenser,
+                and button are consistently distributed the same way
+                at initialization on every episode. Otherwise the initial
+                distribution is reflected about the yaxis with 50% prob.
+                Only applies when rand_pdb is false.
         """
         self.place_player_pile_button(
             rand_pdb,
             player_on_pile,
-            spacing_limit
+            spacing_limit,
+            sym_distr
         )
         self.rand_targ_placement(reserved_coords=reserved_coords)
         self.draw_register()
 
     def orthogonal_line_match(self, rand_pdb=True,
                                     player_on_pile=False,
-                                    spacing_limit=None):
+                                    spacing_limit=None,
+                                    sym_distr=True):
         """
         Initialization function for the orthogonal line match game C.
 
@@ -1063,17 +1087,25 @@ class Register:
                 spacing_limit steps on either side of the dispenser's
                 initial position. If rand_locs is false, the ending
                 button will always be spacing_limit steps away
+            sym_distr: bool
+                if false and rand_pdb is false, the player, dispenser,
+                and button are consistently distributed the same way
+                at initialization on every episode. Otherwise the initial
+                distribution is reflected about the yaxis with 50% prob.
+                Only applies when rand_pdb is false.
         """
         self.place_player_pile_button(
             rand_pdb,
             player_on_pile,
-            spacing_limit
+            spacing_limit,
+            sym_distr
         )
         self.vertical_targ_spacing()
         self.draw_register()
 
     def uneven_line_match(self, rand_pdb=True, player_on_pile=False,
-                                               spacing_limit=None):
+                                             spacing_limit=None,
+                                             sym_distr=True):
         """
         Initialization function for the uneven line match game D.
 
@@ -1095,11 +1127,18 @@ class Register:
                 spacing_limit steps on either side of the dispenser's
                 initial position. If rand_locs is false, the ending
                 button will always be spacing_limit steps away
+            sym_distr: bool
+                if false and rand_pdb is false, the player, dispenser,
+                and button are consistently distributed the same way
+                at initialization on every episode. Otherwise the initial
+                distribution is reflected about the yaxis with 50% prob.
+                Only applies when rand_pdb is false.
         """
         self.place_player_pile_button(
             rand_pdb,
             player_on_pile,
-            spacing_limit
+            spacing_limit,
+            sym_distr
         )
         self.uneven_targ_spacing()
         self.draw_register()
