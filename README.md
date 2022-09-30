@@ -32,6 +32,43 @@ before calling `render()`.
 ## Using gordongames
 After installation, you can use gordongames by making one of the gym environments. See the paper [_Numerical Cognition Without Words: Evidence from Amazonia_](https://www.science.org/doi/10.1126/science.1094492) for more details about each game.
 
+### Info dict
+The `info` dict returns a number of useful bits of information about
+the state of the game. In general, the info dict reflects the state of
+the game for the previous visual observation. This is because during
+data collection in many RL work flows, the final visual frame is ignored
+but the final reward is important. So, often the game data is collecte
+so that we keep the first visual obs and ignore the last visual obs but
+want to collect all the other data starting from the second visual obs
+through the last visual obs. All this is to say, if there was 1 item
+on the grid in frame produced by `env.reset()`, the info dict for the
+next frame will have a value `info["n_items"] == 1`. Here is a breakdown
+of all the information keys.
+
+    is_harsh: bool
+        a boolean indicating if the reward system is in harsh mode
+    n_targs: int
+        the target quantity for this episode
+    n_items: int
+        The number of items on the grid. There are a few quirks about
+        this value. First, during the animation phase, this value
+        represents the number of target items that have been displayed
+        so far. After the animation phase, this value represents the
+        number of play items have been dispensed to the grid by the
+        player.
+    n_aligned: int
+        the number of target items that have a corresponding, aligned
+        (along the same column) play items.
+    disp_targs: int
+        a binary int representing if the target objects are visually
+        displayed or not.
+    is_animating: int
+        a binary int representing if the animation phase is occuring.
+        The player cannot GRAB during the animation phase.
+    is_pop: int
+        a binary int representing if the player is currently on top of
+        the item dispensing pile. pop stands for player on pile. 
+
 #### Environment v0 Even Line Match
 Use `gym.make('gordongames-v0')` to create the Line Match game. The agent must match the number of target objects by aligning them within the target columns. Targets are evenly spaced. These are the default options for the game (see Game Details to understand what each variable does):
 

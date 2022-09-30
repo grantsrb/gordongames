@@ -10,7 +10,7 @@ import time
 if __name__=="__main__":
     render = True
     n_episodes = 10
-    delay = 0
+    delay = 3
 
     kwargs = {
         "targ_range": (1,5),
@@ -91,8 +91,8 @@ if __name__=="__main__":
                     print()
                     #plt.imshow(prev_obs)
                     #plt.show()
-                    env.render()
                     time.sleep(delay)
+                    env.render()
         print("Targ distr")
         print("n_targs, count")
         for k,v in targ_distr.items():

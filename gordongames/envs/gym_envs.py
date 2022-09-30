@@ -17,6 +17,16 @@ except ImportError as e:
 class GordonGame(gym.Env):
     """
     The base class for all gordongames variants.
+
+    NOTE: in general, the value for all info values is shifted one step
+    so that it represents the number of items for the observation of the
+    previous time step.
+    This is because when processing the data, we usually have one more
+    image observation than game infos (due to the env.reset() function not
+    returning an info dict until recently). We then ignore the final
+    observation of the game because it's unimportant to the model.
+    value for is_pop (is_player_on_pile) represents the current time
+    step.
     """
     metadata = {'render.modes': ['human']}
 

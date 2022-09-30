@@ -126,6 +126,15 @@ class Controller:
     def calculate_reward(self):
         raise NotImplemented
 
+    def is_pop(self):
+        """
+        Function to determine if player is on the pile.
+        """
+        reg = self.register
+        if reg.pile in reg.coord_register[reg.player.coord]:
+            return 1
+        return 0
+
     def step(self, direction: int, grab: int):
         """
         Step takes a movement and a grabbing action. The function
@@ -174,6 +183,7 @@ class Controller:
             )),
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
+            "is_pop": int(self.is_pop()),
         }
         if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal()
@@ -330,6 +340,7 @@ class NavigationTaskController(Controller):
             )),
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
+            "is_pop": int(self.is_pop()),
         }
 
         event = self.register.step(direction, grab)
@@ -730,6 +741,7 @@ class BriefPresentationController(ClusterMatchController):
             )),
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
+            "is_pop": int(self.is_pop()),
         }
         if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal()
@@ -840,6 +852,7 @@ class NutsInCanController(EvenLineMatchController):
             )),
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
+            "is_pop": int(self.is_pop()),
         }
         if self.targ is None:
             self.targ = self.invis_targs.pop()
@@ -973,6 +986,7 @@ class VisNutsController(EvenLineMatchController):
             )),
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
+            "is_pop": int(self.is_pop()),
         }
         if self.targ is None:
             self.targ = self.invis_targs.pop()
