@@ -810,7 +810,6 @@ class NutsInCanController(EvenLineMatchController):
             targ.color = COLORS[DEFAULT]
         self.flashed_targs = []
         self.register.draw_register()
-
         return self.grid.grid
 
     def step(self, direction: int, grab: int):
@@ -1078,32 +1077,12 @@ class StaticVisNutsController(VisNutsController):
         self.register.draw_register()
         return self.grid.grid
 
-class GiveNController(VisNutsController):
+class GiveNController(NutsInCanController):
     """
     This class creates a game in which the environment does not ever
     display the targets. The env also immediately displays the end
     animation signal.
     """
-    def reset(self, n_targs=None):
-        """
-        This function should be called everytime the environment starts
-        a new episode.
-        """
-        self.init_variables(n_targs)
-        # randomize object placement on grid, only display one target
-        # for first frame. invis_targs is a set
-        self.register.cluster_match(
-            {self.register.get_signal_coord()},
-            rand_pdb=self.rand_pdb,
-            player_on_pile=self.player_on_pile,
-            spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
-        )
-        self.invis_targs = self.register.targs
-        self.targ = None
-        self.flashed_targs = []
-        self.register.draw_register()
-        return self.grid.grid
 
     def step(self, direction: int, grab: int):
         """
@@ -1132,6 +1111,10 @@ class GiveNController(VisNutsController):
             1: grab item. item will follow player to whichever square
               they move to.
         """
+        if self.is_animating:
+            self.register.make_signal()
+            self.register.hide_targs()
+            self.is_animating = False
         self.n_steps += 1
         info = {
             "is_harsh": self.harsh,
@@ -1146,7 +1129,6 @@ class GiveNController(VisNutsController):
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
         }
-        if self.is_animating: self.end_animation()
 
         event = self.register.step(direction, grab)
         done = False

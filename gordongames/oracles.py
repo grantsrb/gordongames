@@ -55,8 +55,11 @@ class GordonOracle(Oracle):
             self.brain = gg.envs.ggames.ai.navigation_task
         elif self.env_type == "gordongames-v10":
             self.brain = gg.envs.ggames.ai.nuts_in_can
+        elif self.env_type == "gordongames-v11":
+            self.brain = gg.envs.ggames.ai.nuts_in_can
         else:
-            raise NotImplemented
+            print("Using nuts_in_can oracle")
+            self.brain = gg.envs.ggames.ai.nuts_in_can
 
     def __call__(self, env, *args, **kwargs):
         """
