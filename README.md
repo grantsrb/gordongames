@@ -70,89 +70,51 @@ of all the information keys.
         the item dispensing pile. pop stands for player on pile. 
 
 #### Environment v0 Even Line Match
-Use `gym.make('gordongames-v0')` to create the Line Match game. The agent must match the number of target objects by aligning them within the target columns. Targets are evenly spaced. These are the default options for the game (see Game Details to understand what each variable does):
+Use `gym.make('gordongames-v0')` to create the Line Match game. The agent must match the number of target objects by aligning them within the target columns. Targets are evenly spaced. 
+
+The default params:
 
     grid_size = [33,33]
     pixel_density = 1
     targ_range = (1,10)
 
 #### Environment v1 Cluster Match
-Use `gym.make('gordongames-v1')` to create the Cluster Line Match game. The agent must match the number target objects, but the target objects are randomly distributed and the agent must align the items in a row. These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
+Use `gym.make('gordongames-v1')` to create the Cluster Line Match game. The agent must match the number target objects, but the target objects are randomly distributed and the agent must align the items in a row. 
 
 #### Environment v2 Orthogonal Line Match
-Use `gym.make('gordongames-v2')` to create the Orthogonal Line Match game. The agent must match the number of target objects, but the target objects are aligned vertically whereas the agent must align the items along a single row. These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
+Use `gym.make('gordongames-v2')` to create the Orthogonal Line Match game. The agent must match the number of target objects, but the target objects are aligned vertically whereas the agent must align the items along a single row. 
 
 #### Environment v3 Uneven Line Match
-Use `gym.make('gordongames-v3')` to create the Uneven Line Match game. The agent must match the target objects by aligning them along each respective target column. The targets are unevenly spaced. These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
+Use `gym.make('gordongames-v3')` to create the Uneven Line Match game. The agent must match the target objects by aligning them along each respective target column. The targets are unevenly spaced. 
 
 #### Environment v4 Nuts-In-Can
-Use `gym.make('gordongames-v4')` to create the Nuts-In-Can game. The agent initially watches a number of target objects get breifly flashed, one-by-one. These targets are randomly distributed about the target area. After the initial flash, each target is no longer visible. After all targets are flashed, the agent must then grab the pile the same number of times as there are targets. These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
+Use `gym.make('gordongames-v4')` to create the Nuts-In-Can game. The agent initially watches a number of target objects get breifly flashed, one-by-one. These targets are randomly distributed about the target area. After the initial flash, each target is no longer visible. After all targets are flashed, the agent must then grab the pile the same number of times as there are targets. 
 
 #### Environment v5 Reverse Cluster Match
-Use `gym.make('gordongames-v5')` to create the Reverse Cluster Line Match game. The agent must match the number of target objects without aligning them. These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
+Use `gym.make('gordongames-v5')` to create the Reverse Cluster Line Match game. The agent must match the number of target objects without aligning them. 
 
 #### Environment v6 Cluster Cluster Match
-Use `gym.make('gordongames-v6')` to create the Cluster Cluster Match game. The target objects are distributed randomly. The agent must simply match the number of target objects with no structure imposed. These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
+Use `gym.make('gordongames-v6')` to create the Cluster Cluster Match game. The target objects are distributed randomly. The agent must simply match the number of target objects with no structure imposed. 
 
 #### Environment v7 Brief Display
 Use `gym.make('gordongames-v7')` to create the Brief Display game. This is the same as the Cluster Match variant except that the targets are only displayed for the first few frames of the game. The agent must then match the number of randomly distributed target objects from memory. 
 
-These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
 
 #### Environment v8 Visible Nuts-In-Can
 Use `gym.make('gordongames-v8')` to create the Visible Nuts-in-Can game. This is the same as the Nuts-In-Can variant except that the targets are displayed for the entire episode. 
 
-These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
 
 #### Environment v9 Navigation Task
 Use `gym.make('gordongames-v9')` to create the Navigation Task game. The goal of this game is to return all items to the dispenser and then end the episode. This is a non-numeric game which can be used as a control for visual experience without numeric experience.
 
-These are the default options for the game (see Game Details to understand what each variable does):
-
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
 
 #### Environment v10 Static Visible Nuts-In-Can
 Use `gym.make('gordongames-v10')` to create the Static Visible Nuts-in-Can game. This is the same as the Visible Nuts-In-Can variant except that all targets are displayed on the first frame instead of being revealed one-by-one.
 
-These are the default options for the game (see Game Details to understand what each variable does):
 
-    grid_size = [33,33]
-    pixel_density = 1
-    targ_range = (1,10)
+#### Environment v11 Give N
+Use `gym.make('gordongames-v11')` to create the Give N game. This game never displays the target quantities in the episode. The animation phase ends on the first step of the game. The user of this code must use the `n_targs` value from the info dict to indicate the target quantity to an agent.
+
 
 ## Game Details
 Each game consists of a randomly intitialized grid with various objects distributed on the grid depending on the game type. The goal is for the agent to first complete some task and then press the end button located in the upper right corner of the grid. Episodes last until the agent presses the end button. The agent can move left, up, right, down, or stay still. The agent also has the ability to interact with objects via the grab action. Grab only acts on objects in the same square as the agent. If the object is an "item", the agent carries the item to wherever it moves on that step. If the object is a "pile", a new item is created and carried with the agent for that step. The ending button is pressed using the grab action. The reward is only granted at the end of each episode if the task was completed successfully.
@@ -208,6 +170,12 @@ The agent receives a +1 reward if the agent removes the exact number of items pl
 - `spacing_limit`: int - if greater than 0, limits the spacing between the player and dispenser, and the ending button and dispenser to be within `spacing_limit` steps on either side of the dispenser's initial position. If `rand_locs` is false, the player and ending button will always be `spacing_limit` steps away symmetrically centered on the dispenser.
 - `rand_timing`: bool - if true, the timing of the initial display phase is stochastic so that the agent cannot simply count the number of frames rather than the number of target items.
 - `timing_p`: float between 0 and 1 - the probability of an animation step displaying the next target object. A value of 1 means the agent could count the number of frames instead of the number of target items. A value of 0 will not allow the game to progress past the animation phase.
+- `max_steps`:  positive valued int or None - the maximum number of steps an episode can take.
+- `zipf_exponent`: float or None - if not None, the target quantities are sampled
+                proportionally to the zipfian distribution with the
+                argued exponent. p = 1/(n^z) where n is the target
+                quantity, z is the zipfian exponent and p is the
+                likelihood.
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 

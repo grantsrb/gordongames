@@ -1078,3 +1078,87 @@ class StaticVisNutsController(VisNutsController):
         self.register.draw_register()
         return self.grid.grid
 
+class GiveNController(VisNutsController):
+    """
+    This class creates a game in which the environment does not ever
+    display the targets. The env also immediately displays the end
+    animation signal.
+    """
+    def reset(self, n_targs=None):
+        """
+        This function should be called everytime the environment starts
+        a new episode.
+        """
+        self.init_variables(n_targs)
+        # randomize object placement on grid, only display one target
+        # for first frame. invis_targs is a set
+        self.register.cluster_match(
+            {self.register.get_signal_coord()},
+            rand_pdb=self.rand_pdb,
+            player_on_pile=self.player_on_pile,
+            spacing_limit=self.spacing_limit,
+            sym_distr=self.sym_distr,
+        )
+        self.invis_targs = self.register.targs
+        self.targ = None
+        self.flashed_targs = []
+        self.register.draw_register()
+        return self.grid.grid
+
+    def step(self, direction: int, grab: int):
+        """
+        Step takes a movement and a grabbing action. The function
+        moves the player and any items in the following way.
+
+        This function determines if the targets should be displayed
+        anymore based on the total number of steps taken so far.
+
+        Args:
+          direction: int [0, 1, 2, 3, 4]
+            Check DIRECTIONS to ensure these values haven't changed
+                0: no movement
+                1: move up (lower row unit)
+                2: move right (higher column unit)
+                3: move down (higher row unit)
+                4: move left (lower column unit)
+          grab: int [0,1]
+            grab is an action to enable the agent to carry items around
+            the grid. when a player is on top of an item, they can grab
+            the item and carry it with them as they move. If the player
+            is on top of a pile, a new item is created and carried with
+            them to the next square.
+        
+            0: quit grabbing item
+            1: grab item. item will follow player to whichever square
+              they move to.
+        """
+        self.n_steps += 1
+        info = {
+            "is_harsh": self.harsh,
+            "n_targs": self.n_targs,
+            "n_items": self.register.n_items,
+            "n_aligned": len(get_aligned_items(
+                items=self.register.items,
+                targs=self.register.targs,
+                min_row=0
+            )),
+            "disp_targs":int(self.register.display_targs),
+            "is_animating":int(self.is_animating),
+            "is_pop": int(self.is_pop()),
+        }
+        if self.is_animating: self.end_animation()
+
+        event = self.register.step(direction, grab)
+        done = False
+        rew = 0
+        if event == BUTTON_PRESS:
+            rew = self.calculate_reward(harsh=self.harsh)
+            done = True
+        elif event == FULL:
+            done = True
+            rew = -1
+        elif event == STEP:
+            done = False
+            rew = 0
+        return self.grid.grid, rew, done, info
+
