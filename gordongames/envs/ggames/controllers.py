@@ -425,7 +425,7 @@ class EvenLineMatchController(Controller):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
+            sym_distr=self.sym_distr
         )
         return self.grid.grid
 
@@ -493,7 +493,7 @@ class ClusterMatchController(EvenLineMatchController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
+            sym_distr=self.sym_distr
         )
         return self.grid.grid
 
@@ -663,7 +663,7 @@ class UnevenLineMatchController(EvenLineMatchController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
+            sym_distr=self.sym_distr
         )
         return self.grid.grid
 
@@ -686,7 +686,7 @@ class OrthogonalLineMatchController(ClusterMatchController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
+            sym_distr=self.sym_distr
         )
         return self.grid.grid
 
@@ -802,7 +802,7 @@ class NutsInCanController(EvenLineMatchController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
+            sym_distr=self.sym_distr
         )
         self.invis_targs = self.register.targs
         self.targ = None
@@ -937,7 +937,7 @@ class VisNutsController(EvenLineMatchController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
+            sym_distr=self.sym_distr
         )
         self.invis_targs = self.register.targs
         self.targ = None
@@ -1070,7 +1070,7 @@ class StaticVisNutsController(VisNutsController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr,
+            sym_distr=self.sym_distr
         )
         self.invis_targs = self.register.targs
         self.targ = None
