@@ -773,3 +773,112 @@ class StaticVisNuts(NutsInCan):
         )
         self.controller.rand = self.rand
         self.controller.reset()
+
+class GiveN(GordonGame):
+    """
+    Creates a gym version of a give n task. Due to the interface of
+    the game, this just means that the target quantity is not displayed
+    at any point in the episode. Intead the user must use the n_targs
+    value in the info dict.
+    """
+    def set_controller(self):
+        self.controller = GiveNController(
+            grid_size=self.grid_size,
+            pixel_density=self.pixel_density,
+            harsh=self.harsh,
+            targ_range=self.targ_range,
+            zipf_exponent=self.zipf_exponent,
+            hold_outs=self.hold_outs,
+            rand_pdb=self.rand_pdb,
+            sym_distr=self.sym_distr,
+            player_on_pile=self.player_on_pile,
+            rand_timing=self.rand_timing,
+            timing_p=self.timing_p,
+            spacing_limit=self.spacing_limit
+        )
+        self.controller.rand = self.rand
+        self.controller.reset()
+
+    def step(self, action):
+        """
+        Args:
+            action: int
+                the action should be an int of either a direction or
+                a grab command
+                    0: null action
+                    1: move up one unit
+                    2: move right one unit
+                    3: move down one unit
+                    4: move left one unit
+                    5: grab/drop object
+        Returns:
+            last_obs: ndarray
+                the observation
+            rew: float
+                the reward
+            done: bool
+                if true, the episode has ended
+            info: dict
+                whatever information the game contains
+        """
+        self.step_count += 1
+
+        direction = STAY
+        grab = 0
+        if action < 5:
+            direction = action
+            grab = 0 # We always handle grabs here
+        elif not self.controller.is_animating:
+            coord = self.controller.register.player.coord
+            if not self.controller.register.is_empty(coord):
+                grab = 1
+
+        # Check if player grabbed the pile
+        grabbed_type = self.get_other_obj_idx(
+            self.controller.register.player,
+            grab
+        )
+        # Other option is if it's an item, but this will only happen
+        # when the agent grabs one that has been placed by the env.
+        if grabbed_type == TYPE2PRIORITY[PILE]:
+            self.place_item()
+            direction = STAY
+            grab = 0
+        elif grabbed_type == TYPE2PRIORITY[BUTTON]:
+            direction = STAY
+            grab = 1
+
+        self.last_obs,rew,done,info = self.controller.step(
+            direction,
+            grab
+        )
+        player = self.controller.register.player
+        reg = self.controller.register
+        if self.step_count > self.max_steps: done = True
+        elif self.step_count == self.max_steps and rew == 0:
+            rew = self.controller.max_punishment
+            done = True
+        info["grab"] = done or grab or grabbed_type==TYPE2PRIORITY[PILE]
+        if grabbed_type==TYPE2PRIORITY[PILE]: info["n_items"] -= 1
+        return self.last_obs, rew, done, info
+
+    def place_item(self):
+        """
+        Creates and places an item along a row.
+        """
+        player = self.controller.register.player
+        middle = self.controller.register.grid.middle_row
+        row = 2
+        coord = None
+        while row < middle and coord is None:
+            coord = find_empty_space_along_row(
+                self.controller.register,
+                (row, player.coord[1])
+            )
+            row += 1
+        if coord is None: return
+        self.controller.register.make_object(
+            obj_type=ITEM,
+            coord=coord
+        )
+

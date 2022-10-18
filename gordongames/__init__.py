@@ -46,3 +46,7 @@ register(
     id='gordongames-v10',
     entry_point='gordongames.envs:StaticVisNuts',
 )
+register(
+    id='gordongames-v11',
+    entry_point='gordongames.envs:GiveN',
+)
