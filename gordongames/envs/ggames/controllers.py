@@ -1086,6 +1086,11 @@ class GiveNController(NutsInCanController):
 
     def step(self, direction: int, grab: int):
         """
+        Initial reset frame is blank with n_items equal to n_targs
+        Subsequent frame has signal, player cannot play still. n_items
+        is equal to 0.
+
+        Next frame, player can play.
         Step takes a movement and a grabbing action. The function
         moves the player and any items in the following way.
 
@@ -1111,10 +1116,6 @@ class GiveNController(NutsInCanController):
             1: grab item. item will follow player to whichever square
               they move to.
         """
-        if self.is_animating:
-            self.register.make_signal()
-            self.register.hide_targs()
-            self.is_animating = False
         self.n_steps += 1
         info = {
             "is_harsh": self.harsh,
@@ -1129,6 +1130,16 @@ class GiveNController(NutsInCanController):
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
         }
+
+        # Initial reset frame is blank with n_items equal to n_targs
+        # Subsequent frame has signal, player cannot play still. n_items
+        # is equal to 0.
+        # Next frame, player can play.
+        if self.n_steps <= 1:
+            info["n_items"] = self.n_targs
+            self.register.make_signal()
+            self.register.hide_targs()
+            self.is_animating = False
 
         event = self.register.step(direction, grab)
         done = False
