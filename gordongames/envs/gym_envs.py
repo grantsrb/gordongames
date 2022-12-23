@@ -44,6 +44,7 @@ class GordonGame(gym.Env):
                  timing_p=0.8,
                  spacing_limit=None,
                  zipf_exponent=None,
+                 min_play_area=False,
                  *args, **kwargs):
         """
         Args:
@@ -97,6 +98,11 @@ class GordonGame(gym.Env):
                 argued exponent. p = 1/(n^z) where n is the target
                 quantity, z is the zipfian exponent and p is the
                 likelihood.
+            min_play_area: bool
+                if true, minimizes the play area (area above the
+                dividing line of the grid) to 4 rows. Otherwise,
+                dividing line is placed at approximately the middle
+                row of the grid.
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -122,6 +128,7 @@ class GordonGame(gym.Env):
         self.timing_p = timing_p
         self.spacing_limit = spacing_limit
         self.zipf_exponent = zipf_exponent
+        self.min_play_area = min_play_area
         self.viewer = None
         self.action_space = spaces.Discrete(6)
         self.is_grabbing = False
@@ -136,12 +143,31 @@ class GordonGame(gym.Env):
             high=obs+np.max(list(COLORS.values()))
         )
 
-    def set_controller(self):
+    def set_controller(self, contr_kwargs=None):
         """
         Must override this function and set a member `self.controller`
         """
-        self.controller = None # Must set a controller
-        raise NotImplemented
+        if not hasattr(self, "controller_type"):
+            raise NotImplemented
+        if contr_kwargs is None:
+            contr_kwargs = {
+                "grid_size": self.grid_size,
+                "pixel_density": self.pixel_density,
+                "harsh": self.harsh,
+                "targ_range": self.targ_range,
+                "zipf_exponent": self.zipf_exponent,
+                "hold_outs": self.hold_outs,
+                "rand_pdb": self.rand_pdb,
+                "sym_distr": self.sym_distr,
+                "player_on_pile": self.player_on_pile,
+                "rand_timing": self.rand_timing,
+                "timing_p": self.timing_p,
+                "spacing_limit": self.spacing_limit,
+                "min_play_area": self.min_play_area,
+            }
+        self.controller = self.controller_type(**contr_kwargs)
+        self.controller.rand = self.rand
+        self.controller.reset()
 
     def _toggle_grab(self):
         """
@@ -295,22 +321,8 @@ class EvenLineMatch(GordonGame):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = EvenLineMatchController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = EvenLineMatchController
+        super().set_controller()
 
 class ClusterMatch(GordonGame):
     """
@@ -327,22 +339,8 @@ class ClusterMatch(GordonGame):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = ClusterMatchController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = ClusterMatchController
+        super().set_controller()
 
 class OrthogonalLineMatch(GordonGame):
     """
@@ -357,22 +355,8 @@ class OrthogonalLineMatch(GordonGame):
     before this.
     """
     def set_controller(self):
-        self.controller = OrthogonalLineMatchController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = OrthogonalLineMatchController
+        super().set_controller()
 
 class UnevenLineMatch(GordonGame):
     """
@@ -385,22 +369,8 @@ class UnevenLineMatch(GordonGame):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = UnevenLineMatchController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = UnevenLineMatchController
+        super().set_controller()
 
 class ReverseClusterMatch(GordonGame):
     """
@@ -416,22 +386,8 @@ class ReverseClusterMatch(GordonGame):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = ReverseClusterMatchController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = ReverseClusterMatchController
+        super().set_controller()
 
 class ClusterClusterMatch(GordonGame):
     """
@@ -447,22 +403,8 @@ class ClusterClusterMatch(GordonGame):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = ClusterClusterMatchController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = ClusterClusterMatchController
+        super().set_controller()
 
 class BriefPresentation(GordonGame):
     """
@@ -482,22 +424,8 @@ class BriefPresentation(GordonGame):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = BriefPresentationController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = BriefPresentationController
+        super().set_controller()
 
 class NavigationTask(GordonGame):
     """
@@ -510,22 +438,8 @@ class NavigationTask(GordonGame):
     using the ending button.
     """
     def set_controller(self):
-        self.controller = NavigationTaskController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = NavigationTaskController
+        super().set_controller()
 
     def step(self, action):
         """
@@ -580,22 +494,8 @@ class NutsInCan(GordonGame):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = NutsInCanController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = NutsInCanController
+        super().set_controller()
 
     def step(self, action):
         """
@@ -708,22 +608,8 @@ class VisNuts(NutsInCan):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = VisNutsController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = VisNutsController
+        super().set_controller()
 
 class StaticVisNuts(NutsInCan):
     """
@@ -757,22 +643,8 @@ class StaticVisNuts(NutsInCan):
     to finish well before this.
     """
     def set_controller(self):
-        self.controller = StaticVisNutsController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = StaticVisNutsController
+        super().set_controller()
 
 class GiveN(GordonGame):
     """
@@ -782,22 +654,8 @@ class GiveN(GordonGame):
     value in the info dict.
     """
     def set_controller(self):
-        self.controller = GiveNController(
-            grid_size=self.grid_size,
-            pixel_density=self.pixel_density,
-            harsh=self.harsh,
-            targ_range=self.targ_range,
-            zipf_exponent=self.zipf_exponent,
-            hold_outs=self.hold_outs,
-            rand_pdb=self.rand_pdb,
-            sym_distr=self.sym_distr,
-            player_on_pile=self.player_on_pile,
-            rand_timing=self.rand_timing,
-            timing_p=self.timing_p,
-            spacing_limit=self.spacing_limit
-        )
-        self.controller.rand = self.rand
-        self.controller.reset()
+        self.controller_type = GiveNController
+        super().set_controller()
 
     def step(self, action):
         """

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import time
 
 if __name__=="__main__":
-    n_episodes = 1000
+    n_episodes = 10000
 
     kwargs = {
         "targ_range": (1,17),
@@ -24,6 +24,7 @@ if __name__=="__main__":
         "timing_p": 0.8,
         "spacing_limit": None,
         "zipf_exponent": 1,
+        "min_play_area": True,
     }
     env_names = [
         #"gordongames-v0",

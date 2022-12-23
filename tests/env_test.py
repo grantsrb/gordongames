@@ -9,37 +9,39 @@ import time
 
 if __name__=="__main__":
     render = True
-    n_episodes = 10
-    delay = 3
+    save_figs = False
+    n_episodes = 2
+    delay = .3
 
     kwargs = {
-        "targ_range": (1,5),
+        "targ_range": (2,5),
         "hold_outs": {},
-        "grid_size": (13,15),
+        "grid_size": (17,31),
         "pixel_density": 1,
         "seed": int(time.time()),
         "harsh": True,
         "max_steps": None,
-        "rand_pdb": True,
+        "rand_pdb": False,
         "player_on_pile": True,
         "rand_timing": False,
         "timing_p": 0.8,
-        "spacing_limit": 0,
-        "sym_distr": False,
+        "spacing_limit": 2,
+        "sym_distr": True,
+        "min_play_area": True,
     }
     env_names = [
         #"gordongames-v0",
         #"gordongames-v1",
         #"gordongames-v2",
         #"gordongames-v3",
-        #"gordongames-v4",
+        "gordongames-v4",
         #"gordongames-v5",
         #"gordongames-v6",
         #"gordongames-v7",
         #"gordongames-v8",
         #"gordongames-v9",
         #"gordongames-v10",
-        "gordongames-v11",
+        #"gordongames-v11",
     ]
     start_time = time.time()
     for env_name in env_names:
@@ -79,6 +81,14 @@ if __name__=="__main__":
                         print("actn: GRAB")
                 prev_obs = obs
                 obs, rew, done, info = env.step(actn)
+
+                if save_figs:
+                    img = obs
+                    fig = plt.figure(figsize=(10,10))
+                    plt.imshow(img)
+                    plt.savefig("imgs/{}{}_img{}.png".format(env_name, i, n_steps))
+                    plt.clf()
+
                 n_steps += 1
                 if render:
                     print("step:", n_steps)

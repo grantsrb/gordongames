@@ -28,6 +28,7 @@ class Controller:
                  rand_timing: bool=False,
                  timing_p: float=0.8,
                  zipf_exponent=None,
+                 min_play_area=False,
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)
@@ -77,6 +78,11 @@ class Controller:
             argued exponent. p = 1/(n^z) where n is the target
             quantity, z is the zipfian exponent and p is the
             likelihood.
+        min_play_area: bool
+            if true, minimizes the play area (area above the
+            dividing line of the grid) to 4 rows. Otherwise,
+            dividing line is placed at approximately the middle
+            row of the grid.
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -91,6 +97,7 @@ class Controller:
         self.player_on_pile = player_on_pile
         self.spacing_limit = spacing_limit
         self.zipf_exponent = zipf_exponent
+        self.min_play_area = min_play_area
         self.rand_timing = rand_timing
         self.timing_p = timing_p
         trgs = set(range(targ_range[0],targ_range[1]+1))
@@ -232,7 +239,8 @@ class NavigationTaskController(Controller):
         self.grid = Grid(
             grid_size=self.grid_size,
             pixel_density=self.density,
-            divide=True
+            divide=True,
+            min_play_area=self.min_play_area
         )
         self.register = Register(self.grid, n_targs=2)
 
@@ -387,7 +395,8 @@ class EvenLineMatchController(Controller):
         self.grid = Grid(
             grid_size=self.grid_size,
             pixel_density=self.density,
-            divide=True
+            divide=True,
+            min_play_area=self.min_play_area
         )
         self.register = Register(self.grid, n_targs=1)
         self.harsh = harsh

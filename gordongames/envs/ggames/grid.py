@@ -16,7 +16,8 @@ class Grid:
     def __init__(self,
                  grid_size: int or tuple=(31,31),
                  pixel_density: int=1,
-                 divide: bool=True):
+                 divide: bool=True,
+                 min_play_area=False):
         """
         Args:
           grid_size: int or tuple (n_row, n_col)
@@ -32,8 +33,14 @@ class Grid:
             if true, a divider is drawn horizontally across the middle 
             of the grid. If even number of rows, the divder is rounded
             up after dividing the height by two
+          min_play_area: bool
+            if true, minimizes the play area (area above the
+            dividing line of the grid) to 4 rows. Otherwise,
+            dividing line is placed at approximately the middle
+            row of the grid.
         """
         self._divided = divide
+        self.min_play_area = min_play_area
         if type(grid_size) == int:
             self._grid_size = (grid_size, grid_size)
         else:
@@ -86,6 +93,7 @@ class Grid:
 
     @property
     def middle_row(self):
+        if self.min_play_area: return 4
         half = self.shape[0]/2
         if self.shape[0] % 2 == 0: return half + 1
         else: return int(half)
