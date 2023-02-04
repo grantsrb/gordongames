@@ -41,24 +41,15 @@ class GordonOracle(Oracle):
             self.brain = gg.envs.ggames.ai.cluster_match
         elif self.env_type == "gordongames-v3":
             self.brain = gg.envs.ggames.ai.even_line_match
-        elif self.env_type == "gordongames-v4":
-            self.brain = gg.envs.ggames.ai.nuts_in_can
         elif self.env_type == "gordongames-v5":
             self.brain = gg.envs.ggames.ai.rev_cluster_match
         elif self.env_type == "gordongames-v6":
             self.brain = gg.envs.ggames.ai.rev_cluster_match
         elif self.env_type == "gordongames-v7":
             self.brain = gg.envs.ggames.ai.brief_display
-        elif self.env_type == "gordongames-v8":
-            self.brain = gg.envs.ggames.ai.nuts_in_can
         elif self.env_type == "gordongames-v9":
             self.brain = gg.envs.ggames.ai.navigation_task
-        elif self.env_type == "gordongames-v10":
-            self.brain = gg.envs.ggames.ai.nuts_in_can
-        elif self.env_type == "gordongames-v11":
-            self.brain = gg.envs.ggames.ai.nuts_in_can
         else:
-            print("Using nuts_in_can oracle")
             self.brain = gg.envs.ggames.ai.nuts_in_can
 
     def __call__(self, env, *args, **kwargs):

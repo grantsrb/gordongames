@@ -117,8 +117,11 @@ Use `gym.make('gordongames-v9')` to create the Navigation Task game. The goal of
 Use `gym.make('gordongames-v10')` to create the Static Visible Nuts-in-Can game. This is the same as the Visible Nuts-In-Can variant except that all targets are displayed on the first frame instead of being revealed one-by-one.
 
 
-#### Environment v11 Give N
+#### Environment v11 Invis N
 Use `gym.make('gordongames-v11')` to create the Give N game. This game never displays the target quantities in the episode. The animation phase ends on the first step of the game. The user of this code must use the `n_targs` value from the info dict to indicate the target quantity to an agent.
+
+#### Environment v12 Vis N
+Use `gym.make('gordongames-v12')` to create the Vis N game. This is the same as the Give N variant except that the targets are visible and displayed on the first frame. This is also the same as the Static Visible Nuts-in-Can game except that the animation phase ends on the first frame.
 
 
 ## Game Details

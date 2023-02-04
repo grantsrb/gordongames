@@ -703,9 +703,9 @@ class BriefPresentationController(ClusterMatchController):
     """
     This class creates an instance of the Cluster Line Match game in
     which the presentation of the number of targets is only displayed
-    for n_targs frames total or 1*n_targs-2*n_targs frames depending on
-    the value of self.rand_timing (in the sampling case, the value is
-    uniformly sampled at the beginning of the episode).
+    for n_targs frames total or 1*n_targs to 2*n_targs frames depending
+    on the value of self.rand_timing (in the sampling case, the value
+    is uniformly sampled at the beginning of the episode).
 
     The agent must place the same number of items as the number of
     targets that were originally displayed along a single row. The
@@ -1045,6 +1045,7 @@ class VisNutsController(EvenLineMatchController):
         for targ in self.flashed_targs:
             targ.color = COLORS[TARG]
         self.is_animating = False
+        #self.register.draw_register()
 
 class StaticVisNutsController(VisNutsController):
     """
@@ -1081,16 +1082,19 @@ class StaticVisNutsController(VisNutsController):
             sym_distr=self.sym_distr
         )
         self.invis_targs = self.register.targs
+        #for targ in self.invis_targs:
+        #    targ.color = COLORS[TARG]
         self.targ = None
         self.flashed_targs = []
         self.register.draw_register()
         return self.grid.grid
 
-class GiveNController(NutsInCanController):
+class InvisNController(NutsInCanController):
     """
     This class creates a game in which the environment does not ever
-    display the targets. The env also immediately displays the end
-    animation signal.
+    display the targets. The env also displays the end animation
+    signal on the second frame. So, initial frame from reset, signal
+    pixel, game...
     """
 
     def step(self, direction: int, grab: int):
@@ -1144,11 +1148,90 @@ class GiveNController(NutsInCanController):
         # Subsequent frame has signal, player cannot play still. n_items
         # is equal to 0.
         # Next frame, player can play.
-        if self.n_steps <= 1:
+        if self.is_animating:
             info["n_items"] = self.n_targs
-            self.register.make_signal()
-            self.register.hide_targs()
-            self.is_animating = False
+            if not self.rand_timing or np.random.random()<=self.timing_p:
+                self.register.make_signal()
+                self.register.hide_targs()
+                self.is_animating = False
+
+        event = self.register.step(direction, grab)
+        done = False
+        rew = 0
+        if event == BUTTON_PRESS:
+            rew = self.calculate_reward(harsh=self.harsh)
+            done = True
+        elif event == FULL:
+            done = True
+            rew = -1
+        elif event == STEP:
+            done = False
+            rew = 0
+        return self.grid.grid, rew, done, info
+
+class VisNController(StaticVisNutsController):
+    """
+    This class creates a game in which the environment immediately
+    displays all targets. The env also displays the end animation
+    signal on the second frame. So, initial frame from reset with
+    all target items, signal pixel, game...
+    """
+
+    def step(self, direction: int, grab: int):
+        """
+        Initial reset frame is blank with n_items equal to n_targs
+        Subsequent frame has signal, player cannot play still. n_items
+        is equal to 0.
+
+        Next frame, player can play.
+        Step takes a movement and a grabbing action. The function
+        moves the player and any items in the following way.
+
+        This function determines if the targets should be displayed
+        anymore based on the total number of steps taken so far.
+
+        Args:
+          direction: int [0, 1, 2, 3, 4]
+            Check DIRECTIONS to ensure these values haven't changed
+                0: no movement
+                1: move up (lower row unit)
+                2: move right (higher column unit)
+                3: move down (higher row unit)
+                4: move left (lower column unit)
+          grab: int [0,1]
+            grab is an action to enable the agent to carry items around
+            the grid. when a player is on top of an item, they can grab
+            the item and carry it with them as they move. If the player
+            is on top of a pile, a new item is created and carried with
+            them to the next square.
+        
+            0: quit grabbing item
+            1: grab item. item will follow player to whichever square
+              they move to.
+        """
+        self.n_steps += 1
+        info = {
+            "is_harsh": self.harsh,
+            "n_targs": self.n_targs,
+            "n_items": self.register.n_items,
+            "n_aligned": len(get_aligned_items(
+                items=self.register.items,
+                targs=self.register.targs,
+                min_row=0
+            )),
+            "disp_targs":int(self.register.display_targs),
+            "is_animating":int(self.is_animating),
+            "is_pop": int(self.is_pop()),
+        }
+
+        # Initial reset frame is blank with n_items equal to n_targs
+        # Subsequent frame displays all targs and phase signal,
+        # player cannot play still. n_items is equal to 0.
+        # Next frame, player can play.
+        if self.is_animating:
+            info["n_items"] = self.n_targs
+            if not self.rand_timing or np.random.random()<=self.timing_p:
+                self.end_animation()
 
         event = self.register.step(direction, grab)
         done = False

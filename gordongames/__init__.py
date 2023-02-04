@@ -48,5 +48,9 @@ register(
 )
 register(
     id='gordongames-v11',
-    entry_point='gordongames.envs:GiveN',
+    entry_point='gordongames.envs:InvisN',
+)
+register(
+    id='gordongames-v12',
+    entry_point='gordongames.envs:VisN',
 )

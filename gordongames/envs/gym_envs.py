@@ -467,36 +467,11 @@ class NavigationTask(GordonGame):
         info["grab"] = done or info["grab"]
         return self.last_obs, rew, done, info
 
-class NutsInCan(GordonGame):
+class CanTask(GordonGame):
     """
-    Creates a gym version of Peter Gordon's Nuts-In-A-Can game.
-
-    This class creates a game in which the environment initially flashes
-    the targets one by one until all targets are flashed. At the end
-    of the flashing, a center piece appears (to indicate that the
-    flashing stage is over). The agent must then grab the pile the same
-    number of times as there are targets (each of which was flashed only
-    briefly at the beginning of the game).
-
-    Items corresponding to the number of pile grabs by the agent will
-    automatically align themselves in a neat row after each pile grab.
-    Once the agent believes the number of items is equal to the number
-    of targets, they must press the ending button.
-
-    If the agent exceeds the number of targets, the items will continue
-    to display until the total quantity of items doubles that of the
-    targets.
-
-    The number of steps is based on the size of the grid and the number
-    of target objects on the grid. The maximum step count is enough so
-    that the agent can walk around the perimeter of the playable area
-    n_targs+1 number of times. The optimal policy will always be able
-    to finish well before this.
+    This is an abstract class to unify some code between NutsInCan
+    varieties.
     """
-    def set_controller(self):
-        self.controller_type = NutsInCanController
-        super().set_controller()
-
     def step(self, action):
         """
         Args:
@@ -551,7 +526,6 @@ class NutsInCan(GordonGame):
             grab
         )
         player = self.controller.register.player
-        reg = self.controller.register
         if self.step_count > self.max_steps: done = True
         elif self.step_count == self.max_steps and rew == 0:
             rew = self.controller.max_punishment
@@ -580,7 +554,37 @@ class NutsInCan(GordonGame):
             coord=coord
         )
 
-class VisNuts(NutsInCan):
+class NutsInCan(CanTask):
+    """
+    Creates a gym version of Peter Gordon's Nuts-In-A-Can game.
+
+    This class creates a game in which the environment initially flashes
+    the targets one by one until all targets are flashed. At the end
+    of the flashing, a center piece appears (to indicate that the
+    flashing stage is over). The agent must then grab the pile the same
+    number of times as there are targets (each of which was flashed only
+    briefly at the beginning of the game).
+
+    Items corresponding to the number of pile grabs by the agent will
+    automatically align themselves in a neat row after each pile grab.
+    Once the agent believes the number of items is equal to the number
+    of targets, they must press the ending button.
+
+    If the agent exceeds the number of targets, the items will continue
+    to display until the total quantity of items doubles that of the
+    targets.
+
+    The number of steps is based on the size of the grid and the number
+    of target objects on the grid. The maximum step count is enough so
+    that the agent can walk around the perimeter of the playable area
+    n_targs+1 number of times. The optimal policy will always be able
+    to finish well before this.
+    """
+    def set_controller(self):
+        self.controller_type = NutsInCanController
+        super().set_controller()
+
+class VisNuts(CanTask):
     """
     Creates a gym version of Peter Gordon's Nuts-In-A-Can game in which
     the nuts remain visible.
@@ -611,7 +615,7 @@ class VisNuts(NutsInCan):
         self.controller_type = VisNutsController
         super().set_controller()
 
-class StaticVisNuts(NutsInCan):
+class StaticVisNuts(CanTask):
     """
     Creates a gym version of Peter Gordon's Nuts-In-A-Can game in which
     the nuts remain visible. The difference between this variant and
@@ -648,15 +652,9 @@ class StaticVisNuts(NutsInCan):
 
 class GiveN(GordonGame):
     """
-    Creates a gym version of a give n task. Due to the interface of
-    the game, this just means that the target quantity is not displayed
-    at any point in the episode. Intead the user must use the n_targs
-    value in the info dict.
+    An abstract class to unify code for the visible and invisible give
+    n task variants.
     """
-    def set_controller(self):
-        self.controller_type = GiveNController
-        super().set_controller()
-
     def step(self, action):
         """
         Args:
@@ -711,7 +709,6 @@ class GiveN(GordonGame):
             grab
         )
         player = self.controller.register.player
-        reg = self.controller.register
         if self.step_count > self.max_steps: done = True
         elif self.step_count == self.max_steps and rew == 0:
             rew = self.controller.max_punishment
@@ -739,4 +736,28 @@ class GiveN(GordonGame):
             obj_type=ITEM,
             coord=coord
         )
+
+class InvisN(GiveN):
+    """
+    Creates a gym version of a give n task with no visual numeric signal.
+    Due to the interface of
+    the game, this just means that the target quantity is not displayed
+    at any point in the episode. Intead the user must use the n_targs
+    value in the info dict.
+    """
+    def set_controller(self):
+        self.controller_type = InvisNController
+        super().set_controller()
+
+class VisN(GiveN):
+    """
+    Creates a gym version of a give n task in which n target items are
+    visible from the beginning. The target items are randomly distributed
+    in the demonstration area. For any comparisons to the Give N task,
+    it probably makes sense for the user to use the n_targs value in
+    the info dict as an additional language signal for the policy network.
+    """
+    def set_controller(self):
+        self.controller_type = VisNController
+        super().set_controller()
 

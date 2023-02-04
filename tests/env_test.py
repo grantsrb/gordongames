@@ -10,8 +10,8 @@ import time
 if __name__=="__main__":
     render = True
     save_figs = False
-    n_episodes = 2
-    delay = .3
+    n_episodes = 3
+    delay = 2
 
     kwargs = {
         "targ_range": (2,5),
@@ -34,14 +34,15 @@ if __name__=="__main__":
         #"gordongames-v1",
         #"gordongames-v2",
         #"gordongames-v3",
-        "gordongames-v4",
+        #"gordongames-v4",
         #"gordongames-v5",
         #"gordongames-v6",
         #"gordongames-v7",
         #"gordongames-v8",
         #"gordongames-v9",
         #"gordongames-v10",
-        #"gordongames-v11",
+        "gordongames-v11",
+        "gordongames-v12",
     ]
     start_time = time.time()
     for env_name in env_names:

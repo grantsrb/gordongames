@@ -11,10 +11,13 @@ if __name__=="__main__":
     }
     env_types = [
         "gordongames-v4",
-        "gordongames-v7",
-        "gordongames-v0",
-        "gordongames-v1",
+        "gordongames-v10",
+        "gordongames-v11",
+        "gordongames-v12"
     ]
+
+    print("PRESS q TO MOVE ON TO NEXT GAME TYPE")
+    print("wasd to move, f to press")
     for env_type in env_types:
         print("making new env", env_type)
         env = gym.make(env_type, **args)
