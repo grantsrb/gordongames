@@ -45,29 +45,34 @@ on the grid in frame produced by `env.reset()`, the info dict for the
 next frame will have a value `info["n_items"] == 1`. Here is a breakdown
 of all the information keys.
 
-    is_harsh: bool
+    `is_harsh`: bool
         a boolean indicating if the reward system is in harsh mode
-    n_targs: int
+    `n_targs`: int
         the target quantity for this episode
-    n_items: int
+    `n_items`: int
         The number of items on the grid. There are a few quirks about
         this value. First, during the animation phase, this value
         represents the number of target items that have been displayed
         so far. After the animation phase, this value represents the
         number of play items have been dispensed to the grid by the
         player.
-    n_aligned: int
+    `n_aligned`: int
         the number of target items that have a corresponding, aligned
         (along the same column) play items.
-    disp_targs: int
+    `disp_targs`: int
         a binary int representing if the target objects are visually
         displayed or not.
-    is_animating: int
+    `is_animating`: int
         a binary int representing if the animation phase is occuring.
         The player cannot GRAB during the animation phase.
-    is_pop: int
+    `is_pop`: int
         a binary int representing if the player is currently on top of
         the item dispensing pile. pop stands for player on pile. 
+    `min_play_area`: bool
+        if true, minimizes the play area (area above the
+        dividing line of the grid) to 4 rows. Otherwise,
+        dividing line is placed at approximately the middle
+        row of the grid.
 
 #### Environment v0 Even Line Match
 Use `gym.make('gordongames-v0')` to create the Line Match game. The agent must match the number of target objects by aligning them within the target columns. Targets are evenly spaced. 
