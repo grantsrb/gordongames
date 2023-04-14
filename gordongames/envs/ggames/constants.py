@@ -97,3 +97,4 @@ TYPE2PRIORITY = {
     TARG:5,
     SIGNAL:6,
 }
+

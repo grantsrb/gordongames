@@ -2,6 +2,7 @@ from gordongames.envs.ggames.grid import Grid
 import math
 import time
 import numpy as np
+from collections import defaultdict
 from gordongames.envs.ggames.constants import *
 
 class GameObject:
@@ -94,7 +95,8 @@ class Register:
     """
     def __init__(self,
                  grid: Grid,
-                 n_targs: int):
+                 n_targs: int,
+                 n_held_outs=4):
         """
         Creates a player, a pile, and the specified number of targs.
         
@@ -103,6 +105,8 @@ class Register:
             the grid for the game
           n_targs: int
             the number of targets on the screen
+          n_held_outs: int
+            the number of held out spaces for each target quantity
         """
         self.grid = grid
         self.player = GameObject(obj_type=PLAYER, color=COLORS[PLAYER])
@@ -126,6 +130,8 @@ class Register:
         self.display_targs = True
         self.invsbl_list = []
         self.rand = np.random.default_rng(int(time.time()))
+        self.n_held_outs = n_held_outs
+        self.held_outs = self.get_held_outs(n_held_outs)
 
     @property
     def n_targs(self):
@@ -157,6 +163,42 @@ class Register:
             targs: set of GameObjects
         """
         return {*self._targs}
+
+    def get_held_outs(self, n_held_outs=4):
+        """
+        Creates a dict of heldouts dependent on the parameters of the
+        register.
+
+        Args:
+            n_held_outs: int
+                the number of held out coordinates for each target
+                quantity
+        Returns:
+            held_outs: dict
+                keys: int
+                    the target quantities
+                vals: set of coords
+                    the held out coordinates
+        """
+        rand = np.random.default_rng(12345)
+        if self.grid.is_divided: low = self.grid.middle_row+1
+        else: low = 0
+        high = self.grid.shape[0]
+        max_targ = self.grid.shape[1]
+        held_outs = { t: set() for t in range(1, max_targ) }
+        for n in range(n_held_outs):
+            coords = {(-1,-1), self.get_signal_coord()}
+            for t in range(1, max_targ):
+                coord = (-1,-1)
+                while coord in coords or coord in held_outs[t] or\
+                                (t-1>0 and coord in held_outs[t-1]) or\
+                                (t-2>0 and coord in held_outs[t-2]):
+                    row = rand.integers(low, high)
+                    col = rand.integers(0, self.grid.shape[1])
+                    coord = (row, col)
+                coords.add(coord)
+                held_outs[t].add(coord)
+        return held_outs
 
     def reset(self, n_targs: None or int=None):
         """
@@ -840,27 +882,50 @@ class Register:
             coords.add(coord)
             self.move_object(objs[i], coord=coord)
 
-    def rand_targ_placement(self, reserved_coords=set()):
+    def rand_targ_placement(self,reserved_coords=set(),
+                                 held_outs=defaultdict(set),
+                                 invert=False):
         """
         Places the targets randomly on the grid.
 
         Args:
-            reserved_coords: set of coords
+            reserved_coords: set of coords or dict
                 if you wish any spaces to be avoided when placing the
                 target objects, you can specify these coordinates in
                 the reserved_coords set
+            held_outs: dict
+                if you wish to reserve spaces specific to a target
+                quantity, you can argue a dict with keys corresponding
+                to the target quantities and values of sets of
+                reserved coordinates for those particular quantities
         """
-        coords = {(0,0), *reserved_coords}
+        loop_thresh = 10
+        coords = {(-1,-1), *reserved_coords}
         if self.grid.is_divided: low = self.grid.middle_row+1
         else: low = 0
         high = self.grid.shape[0]
         assert self.n_targs < (high-low)*self.grid.shape[1]
-        for targ in self.targs:
-            coord = (0,0)
-            while not self.is_empty(coord) or coord in coords:
-                row = self.rand.integers(low, high)
-                col = self.rand.integers(0, self.grid.shape[1])
-                coord = (row, col)
+        for t,targ in enumerate(self.targs):
+            t = t + 1
+            coord = (-1,-1)
+            n_loops = 0
+            if invert:
+                availables = list(held_outs[t])
+                while coord in coords or not self.is_empty(coord):
+                    if n_loops<loop_thresh:
+                        idx = self.rand.integers(0,len(availables))
+                        coord = availables[idx]
+                    else:
+                        row = self.rand.integers(low, high)
+                        col = self.rand.integers(0, self.grid.shape[1])
+                        coord = (row, col)
+                    n_loops += 1
+            else:
+                while coord in coords or not self.is_empty(coord)\
+                                    or coord in held_outs[t]:
+                    row = self.rand.integers(low, high)
+                    col = self.rand.integers(0, self.grid.shape[1])
+                    coord = (row, col)
             coords.add(coord)
             self.move_object(targ, coord=coord)
 
@@ -1020,7 +1085,8 @@ class Register:
                             rand_pdb=True,
                             player_on_pile=False,
                             spacing_limit=None,
-                            sym_distr=True):
+                            sym_distr=True,
+                            held_out=False):
         """
         Intialization function for the Cluster Match game B.
 
@@ -1052,6 +1118,9 @@ class Register:
                 at initialization on every episode. Otherwise the initial
                 distribution is reflected about the yaxis with 50% prob.
                 Only applies when rand_pdb is false.
+            held_out: bool
+                if true, will sample an episode that was held out from
+                the non-held out episodes
         """
         self.place_player_pile_button(
             rand_pdb,
@@ -1059,7 +1128,11 @@ class Register:
             spacing_limit,
             sym_distr
         )
-        self.rand_targ_placement(reserved_coords=reserved_coords)
+        self.rand_targ_placement(
+            reserved_coords=reserved_coords,
+            held_outs=self.held_outs,
+            invert=held_out
+        )
         self.draw_register()
 
     def orthogonal_line_match(self, rand_pdb=True,

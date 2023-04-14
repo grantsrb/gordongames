@@ -45,6 +45,7 @@ class GordonGame(gym.Env):
                  spacing_limit=None,
                  zipf_exponent=None,
                  min_play_area=False,
+                 n_held_outs=4,
                  *args, **kwargs):
         """
         Args:
@@ -103,6 +104,8 @@ class GordonGame(gym.Env):
                 dividing line of the grid) to 4 rows. Otherwise,
                 dividing line is placed at approximately the middle
                 row of the grid.
+            n_held_outs: int
+                the number of held out coordinates per target quantity
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -129,6 +132,7 @@ class GordonGame(gym.Env):
         self.spacing_limit = spacing_limit
         self.zipf_exponent = zipf_exponent
         self.min_play_area = min_play_area
+        self.n_held_outs = n_held_outs
         self.viewer = None
         self.action_space = spaces.Discrete(6)
         self.is_grabbing = False
@@ -164,6 +168,7 @@ class GordonGame(gym.Env):
                 "timing_p": self.timing_p,
                 "spacing_limit": self.spacing_limit,
                 "min_play_area": self.min_play_area,
+                "n_held_outs": self.n_held_outs,
             }
         self.controller = self.controller_type(**contr_kwargs)
         self.controller.rand = self.rand
@@ -282,9 +287,10 @@ class GordonGame(gym.Env):
             else: self.max_steps = self.master_max_steps
         else: self.max_steps = max_steps
 
-    def reset(self, n_targs=None, max_steps=None, *args, **kwargs):
+    def reset(self, n_targs=None, max_steps=None, held_out=False,
+                                                *args, **kwargs):
         self.controller.rand = self.rand
-        self.controller.reset(n_targs=n_targs)
+        self.controller.reset(n_targs=n_targs, held_out=held_out)
         self.reset_max_steps(max_steps)
         self.is_grabbing = False
         self.step_count = 0

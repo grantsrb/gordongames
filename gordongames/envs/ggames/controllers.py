@@ -29,6 +29,7 @@ class Controller:
                  timing_p: float=0.8,
                  zipf_exponent=None,
                  min_play_area=False,
+                 n_held_outs=4,
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)
@@ -83,6 +84,8 @@ class Controller:
             dividing line of the grid) to 4 rows. Otherwise,
             dividing line is placed at approximately the middle
             row of the grid.
+        n_held_outs: int
+            the number of held out coordinates per target quantity
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -105,6 +108,7 @@ class Controller:
         self.is_animating = False
         self.rand = np.random.default_rng(int(time.time()))
         self.n_steps = 0
+        self.n_held_outs = n_held_outs
 
     @property
     def targ_range(self):
@@ -257,7 +261,7 @@ class NavigationTaskController(Controller):
         self.is_animating = False
         self.register.display_targs = True
 
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, *args, **kwargs):
         """
         This function should be called everytime the environment starts
         a new episode.
@@ -398,7 +402,9 @@ class EvenLineMatchController(Controller):
             divide=True,
             min_play_area=self.min_play_area
         )
-        self.register = Register(self.grid, n_targs=1)
+        self.register = Register(
+            self.grid, n_targs=1, n_held_outs=self.n_held_outs
+        )
         self.harsh = harsh
 
     def init_variables(self, n_targs=None):
@@ -424,7 +430,7 @@ class EvenLineMatchController(Controller):
         self.register.reset(n_targs)
         self.is_animating = True
 
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, *args, **kwargs):
         """
         This function should be called everytime the environment starts
         a new episode.
@@ -491,18 +497,27 @@ class ClusterMatchController(EvenLineMatchController):
     The agent must place the same number of items as targets along a
     single row. The targets are randomly distributed about the grid.
     """
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, held_out=False):
         """
         This function should be called everytime the environment starts
         a new episode. The animation simply allows a number of frames
         for the agent to count the targets on the grid.
+
+        Args:
+            n_targs: int or None
+                if int is argued, this will dictate the number of
+                target items for the episode
+            held_out: bool
+                if true, will sample an episode that was held out from
+                the non-held out episodes
         """
         self.init_variables(n_targs)
         self.register.cluster_match(
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr
+            sym_distr=self.sym_distr,
+            held_out=held_out
         )
         return self.grid.grid
 
@@ -661,10 +676,18 @@ class UnevenLineMatchController(EvenLineMatchController):
     The agent must align a single item along the column of each of the
     target objects. The target objects are unevenly spaced.
     """
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, *args, **kwargs):
         """
         This function should be called everytime the environment starts
         a new episode.
+
+        Args:
+            n_targs: int or None
+                if int is argued, this will dictate the number of
+                target items for the episode
+            held_out: bool
+                if true, will sample an episode that was held out from
+                the non-held out episodes
         """
         self.init_variables(n_targs)
         # randomizes object placement on grid
@@ -684,7 +707,7 @@ class OrthogonalLineMatchController(ClusterMatchController):
     must be aligned vertically and evenly spaced by 0 if the targs are
     spaced by 0 or items must be spaced by 1 otherwise.
     """
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, *args, **kwargs):
         """
         This function should be called everytime the environment starts
         a new episode.
@@ -798,10 +821,18 @@ class NutsInCanController(EvenLineMatchController):
     to display until the total quantity of items doubles that of the
     targets.
     """
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, held_out=False):
         """
         This function should be called everytime the environment starts
         a new episode.
+
+        Args:
+            n_targs: int or None
+                if int is argued, this will dictate the number of
+                target items for the episode
+            held_out: bool
+                if true, will sample an episode that was held out from
+                the non-held out episodes
         """
         self.init_variables(n_targs)
 
@@ -811,7 +842,8 @@ class NutsInCanController(EvenLineMatchController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr
+            sym_distr=self.sym_distr,
+            held_out=held_out
         )
         self.invis_targs = self.register.targs
         self.targ = None
@@ -932,10 +964,18 @@ class VisNutsController(EvenLineMatchController):
     to display until the total quantity of items doubles that of the
     targets.
     """
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, held_out=False):
         """
         This function should be called everytime the environment starts
         a new episode.
+
+        Args:
+            n_targs: int or None
+                if int is argued, this will dictate the number of
+                target items for the episode
+            held_out: bool
+                if true, will sample an episode that was held out from
+                the non-held out episodes
         """
         self.init_variables(n_targs)
         # randomize object placement on grid, only display one target
@@ -945,7 +985,8 @@ class VisNutsController(EvenLineMatchController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr
+            sym_distr=self.sym_distr,
+            held_out=held_out
         )
         self.invis_targs = self.register.targs
         self.targ = None
@@ -1066,10 +1107,18 @@ class StaticVisNutsController(VisNutsController):
     to display until the total quantity of items doubles that of the
     targets.
     """
-    def reset(self, n_targs=None):
+    def reset(self, n_targs=None, held_out=False):
         """
         This function should be called everytime the environment starts
         a new episode.
+
+        Args:
+            n_targs: int or None
+                if int is argued, this will dictate the number of
+                target items for the episode
+            held_out: bool
+                if true, will sample an episode that was held out from
+                the non-held out episodes
         """
         self.init_variables(n_targs)
         # randomize object placement on grid, only display one target
@@ -1079,7 +1128,8 @@ class StaticVisNutsController(VisNutsController):
             rand_pdb=self.rand_pdb,
             player_on_pile=self.player_on_pile,
             spacing_limit=self.spacing_limit,
-            sym_distr=self.sym_distr
+            sym_distr=self.sym_distr,
+            held_out=held_out
         )
         self.invis_targs = self.register.targs
         #for targ in self.invis_targs:

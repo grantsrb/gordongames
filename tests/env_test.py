@@ -8,15 +8,16 @@ import matplotlib.pyplot as plt
 import time
 
 if __name__=="__main__":
-    render = True
+    render = False
     save_figs = False
-    n_episodes = 3
-    delay = 2
+    n_episodes = 100
+    delay = 1
+    held_out = False
 
     kwargs = {
-        "targ_range": (2,5),
+        "targ_range": (1,2),
         "hold_outs": {},
-        "grid_size": (17,31),
+        "grid_size": (10,10),
         "pixel_density": 1,
         "seed": int(time.time()),
         "harsh": True,
@@ -28,21 +29,22 @@ if __name__=="__main__":
         "spacing_limit": 2,
         "sym_distr": True,
         "min_play_area": True,
+        "n_held_outs": 15,
     }
     env_names = [
         #"gordongames-v0",
         #"gordongames-v1",
         #"gordongames-v2",
         #"gordongames-v3",
-        #"gordongames-v4",
+        "gordongames-v4",
         #"gordongames-v5",
         #"gordongames-v6",
         #"gordongames-v7",
-        #"gordongames-v8",
+        "gordongames-v8",
         #"gordongames-v9",
         #"gordongames-v10",
-        "gordongames-v11",
-        "gordongames-v12",
+        #"gordongames-v11",
+        #"gordongames-v12",
     ]
     start_time = time.time()
     for env_name in env_names:
@@ -58,7 +60,7 @@ if __name__=="__main__":
         rng = range(n_episodes)
         if not render: rng = tqdm(rng)
         for i in rng:
-            obs = env.reset()
+            obs = env.reset(held_out=held_out)
             n_steps = 1
             done = False
             targ_distr[env.controller.n_targs] += 1

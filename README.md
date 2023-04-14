@@ -184,15 +184,20 @@ The agent receives a +1 reward if the agent removes the exact number of items pl
                 argued exponent. p = 1/(n^z) where n is the target
                 quantity, z is the zipfian exponent and p is the
                 likelihood.
+- `min_play_area`: bool - if true, minimizes the play area (area above the
+                dividing line of the grid) to 4 rows. Otherwise,
+                dividing line is placed at approximately the middle
+                row of the grid.
+- `n_held_outs`: int - the number of held out coordinates per target quantity
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 
-    env = gym.snake('gordongames-v0')
+    env = gym.make('gordongames-v0')
     env.targ_range = (1,5)
     observation = env.reset()
     ...
     # You can specify the number of targets directly at reset
-    observation = env.reset( n_targs=5 )
+    observation = env.reset( n_targs=5, held_out=False )
 
 
 #### Environment Parameter Examples
