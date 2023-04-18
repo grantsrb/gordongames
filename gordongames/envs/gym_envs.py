@@ -45,7 +45,7 @@ class GordonGame(gym.Env):
                  spacing_limit=None,
                  zipf_exponent=None,
                  min_play_area=False,
-                 n_held_outs=4,
+                 n_held_outs=0,
                  *args, **kwargs):
         """
         Args:

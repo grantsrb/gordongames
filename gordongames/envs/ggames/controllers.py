@@ -29,7 +29,7 @@ class Controller:
                  timing_p: float=0.8,
                  zipf_exponent=None,
                  min_play_area=False,
-                 n_held_outs=4,
+                 n_held_outs=0,
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)

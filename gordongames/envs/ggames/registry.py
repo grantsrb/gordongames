@@ -96,7 +96,7 @@ class Register:
     def __init__(self,
                  grid: Grid,
                  n_targs: int,
-                 n_held_outs=4):
+                 n_held_outs=0):
         """
         Creates a player, a pile, and the specified number of targs.
         
@@ -909,7 +909,7 @@ class Register:
             t = t + 1
             coord = (-1,-1)
             n_loops = 0
-            if invert:
+            if invert and len(held_outs[t])>0:
                 availables = list(held_outs[t])
                 while coord in coords or not self.is_empty(coord):
                     if n_loops<loop_thresh:

@@ -73,6 +73,9 @@ of all the information keys.
         dividing line of the grid) to 4 rows. Otherwise,
         dividing line is placed at approximately the middle
         row of the grid.
+    `n_held_outs`: int
+        the number of held out coordinates for each target quantity
+        for testing. if 0 is argued, no coordinates are held out.
 
 #### Environment v0 Even Line Match
 Use `gym.make('gordongames-v0')` to create the Line Match game. The agent must match the number of target objects by aligning them within the target columns. Targets are evenly spaced. 
