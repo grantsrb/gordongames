@@ -239,6 +239,9 @@ class GordonGame(gym.Env):
         )
         player = self.controller.register.player
         info["grab"] = self.get_other_obj_idx(player, grab)
+        info["player_loc"] = self.controller.register.player.coord
+        info["count_loc"] = self.controller.register.pile.coord
+        info["end_loc"] = self.controller.register.button.coord
         if self.step_count > self.max_steps: done = True
         elif self.step_count == self.max_steps and rew == 0:
             rew = self.controller.max_punishment
@@ -479,6 +482,9 @@ class NavigationTask(GordonGame):
         """
         self.last_obs, rew, done, info = super().step(action)
         info["grab"] = done or info["grab"]
+        info["player_loc"] = self.controller.register.player.coord
+        info["count_loc"] = self.controller.register.pile.coord
+        info["end_loc"] = self.controller.register.button.coord
         return self.last_obs, rew, done, info
 
 class CanTask(GordonGame):
@@ -545,6 +551,9 @@ class CanTask(GordonGame):
             rew = self.controller.max_punishment
             done = True
         info["grab"] = done or grab or grabbed_type==TYPE2PRIORITY[PILE]
+        info["player_loc"] = self.controller.register.player.coord
+        info["count_loc"] = self.controller.register.pile.coord
+        info["end_loc"] = self.controller.register.button.coord
         if grabbed_type==TYPE2PRIORITY[PILE]: info["n_items"] -= 1
         return self.last_obs, rew, done, info
 
@@ -728,6 +737,9 @@ class GiveN(GordonGame):
             rew = self.controller.max_punishment
             done = True
         info["grab"] = done or grab or grabbed_type==TYPE2PRIORITY[PILE]
+        info["player_loc"] = self.controller.register.player.coord
+        info["count_loc"] = self.controller.register.pile.coord
+        info["end_loc"] = self.controller.register.button.coord
         if grabbed_type==TYPE2PRIORITY[PILE]: info["n_items"] -= 1
         return self.last_obs, rew, done, info
 
