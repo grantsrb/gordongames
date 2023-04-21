@@ -899,9 +899,9 @@ class Register:
             coords.add(coord)
             self.move_object(objs[i], coord=coord)
 
-    def rand_targ_placement(self,reserved_coords=set(),
-                                 held_outs=defaultdict(set),
-                                 invert=False):
+    def rand_targ_placement(self, reserved_coords=set(),
+                                  held_outs=defaultdict(set),
+                                  invert=False):
         """
         Places the targets randomly on the grid.
 
@@ -915,6 +915,9 @@ class Register:
                 quantity, you can argue a dict with keys corresponding
                 to the target quantities and values of sets of
                 reserved coordinates for those particular quantities
+            invert: bool
+                if true, will use the held_out spaces for each
+                target quantity
         """
         loop_thresh = 10
         coords = {(-1,-1), *reserved_coords}

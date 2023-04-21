@@ -138,6 +138,7 @@ class GordonGame(gym.Env):
         self.zipf_exponent = zipf_exponent
         self.min_play_area = min_play_area
         self.n_held_outs = n_held_outs
+        if n_held_outs is None: self.n_held_outs = 0
         self.center_signal = center_signal
         self.viewer = None
         self.action_space = spaces.Discrete(6)
