@@ -8,14 +8,14 @@ import matplotlib.pyplot as plt
 import time
 
 if __name__=="__main__":
-    render = False
+    render = True
     save_figs = False
     n_episodes = 100
     delay = 1
     held_out = False
 
     kwargs = {
-        "targ_range": (1,2),
+        "targ_range": (5,6),
         "hold_outs": {},
         "grid_size": (10,10),
         "pixel_density": 1,
@@ -24,12 +24,13 @@ if __name__=="__main__":
         "max_steps": None,
         "rand_pdb": False,
         "player_on_pile": True,
-        "rand_timing": False,
-        "timing_p": 0.8,
+        "rand_timing": True,
+        "timing_p": 0.5,
         "spacing_limit": 2,
         "sym_distr": True,
         "min_play_area": True,
         "n_held_outs": 15,
+        "center_signal": False,
     }
     env_names = [
         #"gordongames-v0",
@@ -40,7 +41,7 @@ if __name__=="__main__":
         #"gordongames-v5",
         #"gordongames-v6",
         #"gordongames-v7",
-        "gordongames-v8",
+        #"gordongames-v8",
         #"gordongames-v9",
         #"gordongames-v10",
         #"gordongames-v11",

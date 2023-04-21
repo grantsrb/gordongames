@@ -187,7 +187,7 @@ class Register:
         max_targ = self.grid.shape[1]
         held_outs = { t: set() for t in range(1, max_targ) }
         for n in range(n_held_outs):
-            coords = {(-1,-1), self.get_signal_coord()}
+            coords = {(-1,-1)}
             for t in range(1, max_targ):
                 coord = (-1,-1)
                 while coord in coords or coord in held_outs[t] or\
@@ -594,35 +594,51 @@ class Register:
                 return BUTTON_PRESS
         return STEP
 
-    def get_signal_coord(self):
+    def get_signal_coord(self, center_space=True):
         """
-        Returns the center square of the lower half of the grid unless
+        Returns the rightmost square one space down from the topmost
+        row if center_space is false. Otherwise returns the center
+        square of the lower half of the grid unless
         it is occupied. If occupied this function searches one unit
         left, up, right, then down for a free space. This repeats if
         no free spaces are found.
 
+        Args:
+            center_space: bool
+                determines if the signal pixel will go in the middle
+                of the grid or one row down from the top row, in the
+                rightmost column.
         Returns:
             coord: tuple of ints
                 the coordinate in which the signal object goes.
         """
         grid = self.grid
-        row = int(3*grid.shape[0]/4)
-        col = grid.shape[1]//2
-        coord = (row,col)
-        if not self.is_empty(coord):
-            coord = self.find_space(coord, playable_half=False)
-        return coord
+        if center_space:
+            row = int(3*grid.shape[0]/4)
+            col = grid.shape[1]//2
+            coord = (row,col)
+            if not self.is_empty(coord):
+                coord = self.find_space(coord, playable_half=False)
+            return coord
+        else:
+            row = 1
+            col = grid.shape[1]-1
+            return (row,col)
 
-    def make_signal(self, coord=None):
+    def make_signal(self, coord=None, center_signal=True):
         """
         Creates a signal object
 
         Args:
             coord: tuple of ints (row,col) or None
                 optional coordinate for the signal
+            center_signal: bool
+                if true, signal coord will be centered in demonstration
+                area. Otherwise will go one row down from the uppermost
+                right square of the playable area
         """
         if coord is None:
-            coord = self.get_signal_coord()
+            coord = self.get_signal_coord(center_signal)
         self.make_object( obj_type=SIGNAL, coord=coord )
 
     def make_object(self, obj_type: str, coord: tuple):

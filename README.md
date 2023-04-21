@@ -182,16 +182,10 @@ The agent receives a +1 reward if the agent removes the exact number of items pl
 - `rand_timing`: bool - if true, the timing of the initial display phase is stochastic so that the agent cannot simply count the number of frames rather than the number of target items.
 - `timing_p`: float between 0 and 1 - the probability of an animation step displaying the next target object. A value of 1 means the agent could count the number of frames instead of the number of target items. A value of 0 will not allow the game to progress past the animation phase.
 - `max_steps`:  positive valued int or None - the maximum number of steps an episode can take.
-- `zipf_exponent`: float or None - if not None, the target quantities are sampled
-                proportionally to the zipfian distribution with the
-                argued exponent. p = 1/(n^z) where n is the target
-                quantity, z is the zipfian exponent and p is the
-                likelihood.
-- `min_play_area`: bool - if true, minimizes the play area (area above the
-                dividing line of the grid) to 4 rows. Otherwise,
-                dividing line is placed at approximately the middle
-                row of the grid.
+- `zipf_exponent`: float or None - if not None, the target quantities are sampled proportionally to the zipfian distribution with the argued exponent. p = 1/(n^z) where n is the target quantity, z is the zipfian exponent and p is the likelihood.
+- `min_play_area`: bool - if true, minimizes the play area (area above the dividing line of the grid) to 4 rows. Otherwise, dividing line is placed at approximately the middle row of the grid.
 - `n_held_outs`: int - the number of held out coordinates per target quantity
+- `center_signal`: bool - if true, signal coord will be centered in demonstration area. Otherwise will go one row down from the uppermost right square of the playable area
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 

@@ -1,19 +1,32 @@
 import gordongames
 from gordongames.envs.ggames.constants import *
 import gym
+import time
 
 if __name__=="__main__":
     args = {
-        "grid_size": (11,11),
-        "pixel_density": 3,
-        "targ_range": (1,8),
-        "harsh": False,
+        "targ_range": (5,6),
+        "hold_outs": {},
+        "grid_size": (10,10),
+        "pixel_density": 1,
+        "seed": int(time.time()),
+        "harsh": True,
+        "max_steps": None,
+        "rand_pdb": False,
+        "player_on_pile": True,
+        "rand_timing": True,
+        "timing_p": 0.5,
+        "spacing_limit": 2,
+        "sym_distr": True,
+        "min_play_area": True,
+        "n_held_outs": 15,
+        "center_signal": False,
     }
     env_types = [
         "gordongames-v4",
-        "gordongames-v10",
-        "gordongames-v11",
-        "gordongames-v12"
+        #"gordongames-v10",
+        #"gordongames-v11",
+        #"gordongames-v12"
     ]
 
     print("PRESS q TO MOVE ON TO NEXT GAME TYPE")

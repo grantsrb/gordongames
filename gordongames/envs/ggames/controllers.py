@@ -30,6 +30,7 @@ class Controller:
                  zipf_exponent=None,
                  min_play_area=False,
                  n_held_outs=0,
+                 center_signal=True,
                  *args, **kwargs):
         """
         targ_range: tuple (Low, High) (inclusive)
@@ -86,6 +87,10 @@ class Controller:
             row of the grid.
         n_held_outs: int
             the number of held out coordinates per target quantity
+        center_signal: bool
+            if true, signal coord will be centered in demonstration
+            area. Otherwise will go one row down from the uppermost
+            right square of the playable area
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -109,6 +114,7 @@ class Controller:
         self.rand = np.random.default_rng(int(time.time()))
         self.n_steps = 0
         self.n_held_outs = n_held_outs
+        self.center_signal = center_signal
 
     @property
     def targ_range(self):
@@ -197,7 +203,7 @@ class Controller:
             "is_pop": int(self.is_pop()),
         }
         if self.n_steps > self.n_targs and self.is_animating:
-            self.register.make_signal()
+            self.register.make_signal(center_signal=self.center_signal)
             self.is_animating = False
         if self.n_steps < self.n_targs+1:
             grab = 0
@@ -273,7 +279,7 @@ class NavigationTaskController(Controller):
             self.spacing_limit,
             self.sym_distr
         )
-        self.register.make_signal()
+        self.register.make_signal(center_signal=self.center_signal)
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -776,7 +782,7 @@ class BriefPresentationController(ClusterMatchController):
             "is_pop": int(self.is_pop()),
         }
         if self.n_steps > self.n_targs and self.is_animating:
-            self.register.make_signal()
+            self.register.make_signal(center_signal=self.center_signal)
             self.register.hide_targs()
             self.is_animating = False
         if self.n_steps < self.n_targs+1:
@@ -940,7 +946,7 @@ class NutsInCanController(EvenLineMatchController):
         to display an object that indicates the player should begin
         its counting.
         """
-        self.register.make_signal()
+        self.register.make_signal(center_signal=self.center_signal)
         for targ in self.flashed_targs:
             targ.color = COLORS[TARG]
         self.register.hide_targs()
@@ -1082,7 +1088,7 @@ class VisNutsController(EvenLineMatchController):
         to display an object that indicates the player should begin
         its counting.
         """
-        self.register.make_signal()
+        self.register.make_signal(center_signal=self.center_signal)
         for targ in self.flashed_targs:
             targ.color = COLORS[TARG]
         self.is_animating = False
@@ -1201,7 +1207,7 @@ class InvisNController(NutsInCanController):
         if self.is_animating:
             info["n_items"] = self.n_targs
             if not self.rand_timing or np.random.random()<=self.timing_p:
-                self.register.make_signal()
+                self.register.make_signal(center_signal=self.center_signal)
                 self.register.hide_targs()
                 self.is_animating = False
 

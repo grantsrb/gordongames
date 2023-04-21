@@ -46,6 +46,7 @@ class GordonGame(gym.Env):
                  zipf_exponent=None,
                  min_play_area=False,
                  n_held_outs=0,
+                 center_signal=True,
                  *args, **kwargs):
         """
         Args:
@@ -106,6 +107,10 @@ class GordonGame(gym.Env):
                 row of the grid.
             n_held_outs: int
                 the number of held out coordinates per target quantity
+            center_signal: bool
+                if true, signal coord will be centered in demonstration
+                area. Otherwise will go one row down from the uppermost
+                right square of the playable area
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size
@@ -133,6 +138,7 @@ class GordonGame(gym.Env):
         self.zipf_exponent = zipf_exponent
         self.min_play_area = min_play_area
         self.n_held_outs = n_held_outs
+        self.center_signal = center_signal
         self.viewer = None
         self.action_space = spaces.Discrete(6)
         self.is_grabbing = False
@@ -169,6 +175,7 @@ class GordonGame(gym.Env):
                 "spacing_limit": self.spacing_limit,
                 "min_play_area": self.min_play_area,
                 "n_held_outs": self.n_held_outs,
+                "center_signal": self.center_signal,
             }
         self.controller = self.controller_type(**contr_kwargs)
         self.controller.rand = self.rand
