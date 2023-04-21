@@ -186,18 +186,19 @@ class Register:
         high = self.grid.shape[0]
         max_targ = self.grid.shape[1]
         held_outs = { t: set() for t in range(1, max_targ) }
-        for n in range(n_held_outs):
-            coords = {(-1,-1)}
-            for t in range(1, max_targ):
-                coord = (-1,-1)
-                while coord in coords or coord in held_outs[t] or\
-                                (t-1>0 and coord in held_outs[t-1]) or\
-                                (t-2>0 and coord in held_outs[t-2]):
-                    row = rand.integers(low, high)
-                    col = rand.integers(0, self.grid.shape[1])
-                    coord = (row, col)
-                coords.add(coord)
-                held_outs[t].add(coord)
+        if n_held_outs is not None:
+            for n in range(n_held_outs):
+                coords = {(-1,-1)}
+                for t in range(1, max_targ):
+                    coord = (-1,-1)
+                    while coord in coords or coord in held_outs[t] or\
+                                 (t-1>0 and coord in held_outs[t-1]) or\
+                                 (t-2>0 and coord in held_outs[t-2]):
+                        row = rand.integers(low, high)
+                        col = rand.integers(0, self.grid.shape[1])
+                        coord = (row, col)
+                    coords.add(coord)
+                    held_outs[t].add(coord)
         return held_outs
 
     def reset(self, n_targs: None or int=None):
