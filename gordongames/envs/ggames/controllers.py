@@ -201,6 +201,7 @@ class Controller:
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
+            "skipped": 0,
         }
         if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal(center_signal=self.center_signal)
@@ -209,6 +210,7 @@ class Controller:
             grab = 0
             if self.rand_timing and np.random.random()>self.timing_p:
                 self.n_steps -= 1
+                info["skipped"] = 1
             info["n_items"] = self.n_steps-1
         elif self.n_steps == self.n_targs+1:
             grab = 0
@@ -780,6 +782,7 @@ class BriefPresentationController(ClusterMatchController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
+            "skipped": 0,
         }
         if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal(center_signal=self.center_signal)
@@ -789,6 +792,7 @@ class BriefPresentationController(ClusterMatchController):
             grab = 0
             if self.rand_timing and np.random.random()>self.timing_p:
                 self.n_steps -= 1
+                info["skipped"] = 1
             info["n_items"] = self.n_steps-1
         elif self.n_steps == self.n_targs+1:
             grab = 0
@@ -899,6 +903,7 @@ class NutsInCanController(EvenLineMatchController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
+            "skipped": 0,
         }
         if self.targ is None:
             self.targ = self.invis_targs.pop()
@@ -907,6 +912,7 @@ class NutsInCanController(EvenLineMatchController):
             self.targ.color = COLORS[DEFAULT]
             if self.rand_timing and np.random.random()>self.timing_p:
                 self.n_steps -= 1
+                info["skipped"] = 1
             else:
                 self.flashed_targs.append(self.targ)
                 self.targ = self.invis_targs.pop()
@@ -1042,6 +1048,7 @@ class VisNutsController(EvenLineMatchController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
+            "skipped": 0,
         }
         if self.targ is None:
             self.targ = self.invis_targs.pop()
@@ -1049,6 +1056,7 @@ class VisNutsController(EvenLineMatchController):
         elif len(self.invis_targs) > 0:
             if self.rand_timing and np.random.random()>self.timing_p:
                 self.n_steps -= 1
+                info["skipped"] = 1
             else:
                 self.flashed_targs.append(self.targ)
                 self.targ = self.invis_targs.pop()
@@ -1198,6 +1206,7 @@ class InvisNController(NutsInCanController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
+            "skipped": 0,
         }
 
         # Initial reset frame is blank with n_items equal to n_targs
@@ -1210,6 +1219,7 @@ class InvisNController(NutsInCanController):
                 self.register.make_signal(center_signal=self.center_signal)
                 self.register.hide_targs()
                 self.is_animating = False
+            else: info["skipped"] = 1
 
         event = self.register.step(direction, grab)
         done = False
@@ -1278,6 +1288,7 @@ class VisNController(StaticVisNutsController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
+            "skipped": 0,
         }
 
         # Initial reset frame is blank with n_items equal to n_targs
@@ -1288,6 +1299,8 @@ class VisNController(StaticVisNutsController):
             info["n_items"] = self.n_targs
             if not self.rand_timing or np.random.random()<=self.timing_p:
                 self.end_animation()
+            else: 
+                info["skipped"] = 1
 
         event = self.register.step(direction, grab)
         done = False
