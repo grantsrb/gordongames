@@ -6,25 +6,27 @@ from gordongames.oracles import GordonOracle
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import time
+import numpy as np
 
 if __name__=="__main__":
-    n_episodes = 10000
+    n_episodes = 1000
 
     kwargs = {
         "targ_range": (1,17),
         "hold_outs": {},
-        "grid_size": (13,29),
+        "grid_size": (13,21),
         "pixel_density": 1,
         "seed": int(time.time()),
         "harsh": True,
         "max_steps": 96,
         "rand_pdb": True,
         "player_on_pile": True,
-        "rand_timing": False,
-        "timing_p": 0.8,
+        "rand_timing": True,
+        "timing_p": 0.7,
         "spacing_limit": None,
         "zipf_exponent": 1,
         "min_play_area": True,
+        "center_signal": True,
     }
     env_names = [
         #"gordongames-v0",
@@ -47,6 +49,8 @@ if __name__=="__main__":
         env = gym.make(env_name, **kwargs)
         env.seed(kwargs["seed"])
         oracle = GordonOracle(env_name)
+        skip_distr = [0,0]
+        contig_skips = [0,0]
         targ_distr = {
             i: 0 for i in range(
                 1,kwargs["targ_range"][-1]+1
@@ -63,6 +67,16 @@ if __name__=="__main__":
                 actn = oracle(env)
                 prev_obs = obs
                 obs, rew, done, info = env.step(actn)
+                if info["is_animating"]:
+                    skip_distr[info["skipped"]] += 1
+                    if info["skipped"]:
+                        if contig_skips[1]:
+                            contig_skips[0] += 1
+                        else:
+                            contig_skips[1] = 1
+                    elif contig_skips[1]:
+                        contig_skips[1] = 0
+                        contig_skips[0] += 1
             n_games += 1
             avg_steps += n_steps
         print("Targ distr")
@@ -70,6 +84,12 @@ if __name__=="__main__":
         for k,v in targ_distr.items():
             print(k, v)
         print("\nAvg Step Count:", avg_steps/n_episodes)
+        print("\nSkip Stats")
+        print("0:", skip_distr[0])
+        print("1:", skip_distr[1])
+        s = np.sum(skip_distr) - n_episodes
+        print("Skip p:", skip_distr[1]/s)
+        print("Contig Skips:", contig_skips[0], "-- p:", contig_skips[0]/s)
         print()
         print()
     print("Tot time:", time.time()-start_time)

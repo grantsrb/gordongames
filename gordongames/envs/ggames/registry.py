@@ -164,7 +164,7 @@ class Register:
         """
         return {*self._targs}
 
-    def get_held_outs(self, n_held_outs=4):
+    def get_held_outs(self, n_held_outs=4, center_signal=True):
         """
         Creates a dict of heldouts dependent on the parameters of the
         register.
@@ -188,7 +188,9 @@ class Register:
         held_outs = { t: set() for t in range(1, max_targ) }
         if n_held_outs is not None:
             for n in range(n_held_outs):
-                coords = {(-1,-1)}
+                coords = {
+                    (-1,-1), self.get_signal_coord(center_signal)
+                }
                 for t in range(1, max_targ):
                     coord = (-1,-1)
                     while coord in coords or coord in held_outs[t] or\
@@ -595,17 +597,17 @@ class Register:
                 return BUTTON_PRESS
         return STEP
 
-    def get_signal_coord(self, center_space=True):
+    def get_signal_coord(self, center_signal=True):
         """
         Returns the rightmost square one space down from the topmost
-        row if center_space is false. Otherwise returns the center
+        row if center_signal is false. Otherwise returns the center
         square of the lower half of the grid unless
         it is occupied. If occupied this function searches one unit
         left, up, right, then down for a free space. This repeats if
         no free spaces are found.
 
         Args:
-            center_space: bool
+            center_signal: bool
                 determines if the signal pixel will go in the middle
                 of the grid or one row down from the top row, in the
                 rightmost column.
@@ -614,7 +616,7 @@ class Register:
                 the coordinate in which the signal object goes.
         """
         grid = self.grid
-        if center_space:
+        if center_signal:
             row = int(3*grid.shape[0]/4)
             col = grid.shape[1]//2
             coord = (row,col)
@@ -641,6 +643,9 @@ class Register:
         if coord is None:
             coord = self.get_signal_coord(center_signal)
         self.make_object( obj_type=SIGNAL, coord=coord )
+        if not center_signal:
+            coord = (coord[0],0)
+            self.make_object( obj_type=SIGNAL, coord=coord )
 
     def make_object(self, obj_type: str, coord: tuple):
         """
@@ -901,7 +906,8 @@ class Register:
 
     def rand_targ_placement(self, reserved_coords=set(),
                                   held_outs=defaultdict(set),
-                                  invert=False):
+                                  invert=False,
+                                  center_signal=True):
         """
         Places the targets randomly on the grid.
 
@@ -920,7 +926,11 @@ class Register:
                 target quantity
         """
         loop_thresh = 10
-        coords = {(-1,-1), *reserved_coords}
+        coords = {
+            (-1, -1),
+             self.get_signal_coord(center_signal),
+             *reserved_coords
+        }
         if self.grid.is_divided: low = self.grid.middle_row+1
         else: low = 0
         high = self.grid.shape[0]

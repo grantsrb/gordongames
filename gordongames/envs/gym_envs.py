@@ -109,8 +109,8 @@ class GordonGame(gym.Env):
                 the number of held out coordinates per target quantity
             center_signal: bool
                 if true, signal coord will be centered in demonstration
-                area. Otherwise will go one row down from the uppermost
-                right square of the playable area
+                area. Otherwise a signal pixel will appear on both
+                edges of the grid one row down from the top.
         """
         # determines the unit dimensions of the grid
         self.grid_size = grid_size

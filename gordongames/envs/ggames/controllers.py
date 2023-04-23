@@ -89,8 +89,8 @@ class Controller:
             the number of held out coordinates per target quantity
         center_signal: bool
             if true, signal coord will be centered in demonstration
-            area. Otherwise will go one row down from the uppermost
-            right square of the playable area
+            area. Otherwise a signal pixel will appear on both
+            edges of the grid one row down from the top.
         """
         if type(targ_range) == int:
             targ_range = (targ_range, targ_range)
@@ -208,9 +208,6 @@ class Controller:
             self.is_animating = False
         if self.n_steps < self.n_targs+1:
             grab = 0
-            if self.rand_timing and np.random.random()>self.timing_p:
-                self.n_steps -= 1
-                info["skipped"] = 1
             info["n_items"] = self.n_steps-1
         elif self.n_steps == self.n_targs+1:
             grab = 0
@@ -361,6 +358,7 @@ class NavigationTaskController(Controller):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
+            "skipped": 0,
         }
 
         event = self.register.step(direction, grab)
@@ -734,9 +732,7 @@ class BriefPresentationController(ClusterMatchController):
     """
     This class creates an instance of the Cluster Line Match game in
     which the presentation of the number of targets is only displayed
-    for n_targs frames total or 1*n_targs to 2*n_targs frames depending
-    on the value of self.rand_timing (in the sampling case, the value
-    is uniformly sampled at the beginning of the episode).
+    for n_targs frames total.
 
     The agent must place the same number of items as the number of
     targets that were originally displayed along a single row. The
@@ -790,9 +786,6 @@ class BriefPresentationController(ClusterMatchController):
             self.is_animating = False
         if self.n_steps < self.n_targs+1:
             grab = 0
-            if self.rand_timing and np.random.random()>self.timing_p:
-                self.n_steps -= 1
-                info["skipped"] = 1
             info["n_items"] = self.n_steps-1
         elif self.n_steps == self.n_targs+1:
             grab = 0
@@ -906,11 +899,15 @@ class NutsInCanController(EvenLineMatchController):
             "skipped": 0,
         }
         if self.targ is None:
-            self.targ = self.invis_targs.pop()
-            self.targ.color = COLORS[TARG]
+            if self.rand_timing and np.random.random()>=self.timing_p:
+                self.n_steps -= 1
+                info["skipped"] = 1
+            else:
+                self.targ = self.invis_targs.pop()
+                self.targ.color = COLORS[TARG]
         elif len(self.invis_targs) > 0:
             self.targ.color = COLORS[DEFAULT]
-            if self.rand_timing and np.random.random()>self.timing_p:
+            if self.rand_timing and np.random.random()>=self.timing_p:
                 self.n_steps -= 1
                 info["skipped"] = 1
             else:
@@ -1051,10 +1048,14 @@ class VisNutsController(EvenLineMatchController):
             "skipped": 0,
         }
         if self.targ is None:
-            self.targ = self.invis_targs.pop()
-            self.targ.color = COLORS[TARG]
+            if self.rand_timing and np.random.random()>=self.timing_p:
+                self.n_steps -= 1
+                info["skipped"] = 1
+            else:
+                self.targ = self.invis_targs.pop()
+                self.targ.color = COLORS[TARG]
         elif len(self.invis_targs) > 0:
-            if self.rand_timing and np.random.random()>self.timing_p:
+            if self.rand_timing and np.random.random()>=self.timing_p:
                 self.n_steps -= 1
                 info["skipped"] = 1
             else:
@@ -1215,11 +1216,9 @@ class InvisNController(NutsInCanController):
         # Next frame, player can play.
         if self.is_animating:
             info["n_items"] = self.n_targs
-            if not self.rand_timing or np.random.random()<=self.timing_p:
-                self.register.make_signal(center_signal=self.center_signal)
-                self.register.hide_targs()
-                self.is_animating = False
-            else: info["skipped"] = 1
+            self.register.make_signal(center_signal=self.center_signal)
+            self.register.hide_targs()
+            self.is_animating = False
 
         event = self.register.step(direction, grab)
         done = False

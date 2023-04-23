@@ -15,7 +15,7 @@ if __name__=="__main__":
     held_out = False
 
     kwargs = {
-        "targ_range": (5,6),
+        "targ_range": (2,3),
         "hold_outs": {},
         "grid_size": (10,10),
         "pixel_density": 1,
@@ -25,7 +25,7 @@ if __name__=="__main__":
         "rand_pdb": False,
         "player_on_pile": True,
         "rand_timing": True,
-        "timing_p": 0.5,
+        "timing_p": 0.85,
         "spacing_limit": 2,
         "sym_distr": True,
         "min_play_area": True,
@@ -41,7 +41,7 @@ if __name__=="__main__":
         #"gordongames-v5",
         #"gordongames-v6",
         #"gordongames-v7",
-        #"gordongames-v8",
+        "gordongames-v8",
         #"gordongames-v9",
         #"gordongames-v10",
         #"gordongames-v11",

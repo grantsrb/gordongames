@@ -185,7 +185,7 @@ The agent receives a +1 reward if the agent removes the exact number of items pl
 - `zipf_exponent`: float or None - if not None, the target quantities are sampled proportionally to the zipfian distribution with the argued exponent. p = 1/(n^z) where n is the target quantity, z is the zipfian exponent and p is the likelihood.
 - `min_play_area`: bool - if true, minimizes the play area (area above the dividing line of the grid) to 4 rows. Otherwise, dividing line is placed at approximately the middle row of the grid.
 - `n_held_outs`: int - the number of held out coordinates per target quantity
-- `center_signal`: bool - if true, signal coord will be centered in demonstration area. Otherwise will go one row down from the uppermost right square of the playable area
+- `center_signal`: bool - if true, signal coord will be centered in demonstration area. Otherwise two signal pixels will appear one row down from the topmost row on the edges of the grid.
 
 Each of these options are member variables of the environment and will come into effect after the environment is reset. For example, if you wanted to use 1-5 targets in game A, you can be set this using the following code:
 
