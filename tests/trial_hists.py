@@ -9,12 +9,12 @@ import time
 import numpy as np
 
 if __name__=="__main__":
-    n_episodes = 1000
+    n_episodes = 10000
 
     kwargs = {
-        "targ_range": (1,17),
+        "targ_range": (1,15),
         "hold_outs": {},
-        "grid_size": (13,21),
+        "grid_size": (13,23),
         "pixel_density": 1,
         "seed": int(time.time()),
         "harsh": True,
@@ -22,8 +22,8 @@ if __name__=="__main__":
         "rand_pdb": True,
         "player_on_pile": True,
         "rand_timing": True,
-        "timing_p": 0.7,
-        "spacing_limit": None,
+        "timing_p": 0.9,
+        "spacing_limit": 9,
         "zipf_exponent": 1,
         "min_play_area": True,
         "center_signal": True,
@@ -43,6 +43,8 @@ if __name__=="__main__":
     ]
     start_time = time.time()
     avg_steps = 0
+    min_steps = np.inf
+    max_steps = 0
     n_games = 0
     for env_name in env_names:
         print("Testing Env:", env_name)
@@ -53,7 +55,7 @@ if __name__=="__main__":
         contig_skips = [0,0]
         targ_distr = {
             i: 0 for i in range(
-                1,kwargs["targ_range"][-1]+1
+                kwargs["targ_range"][0],kwargs["targ_range"][-1]+1
             )
         }
         for i in tqdm(range(n_episodes)):
@@ -79,11 +81,15 @@ if __name__=="__main__":
                         contig_skips[0] += 1
             n_games += 1
             avg_steps += n_steps
+            if n_steps > max_steps: max_steps = n_steps
+            elif n_steps < min_steps: min_steps = n_steps
         print("Targ distr")
         print("n_targs, count")
         for k,v in targ_distr.items():
             print(k, v)
         print("\nAvg Step Count:", avg_steps/n_episodes)
+        print("Min Step Count:", min_steps)
+        print("Max Step Count:", max_steps)
         print("\nSkip Stats")
         print("0:", skip_distr[0])
         print("1:", skip_distr[1])
