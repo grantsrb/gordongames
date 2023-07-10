@@ -22,8 +22,10 @@ if __name__=="__main__":
         "n_held_outs": 15,
         "center_signal": False,
     }
+    print("Seed:", args["seed"])
     env_types = [
-        "gordongames-v4",
+        #"gordongames-v4",
+        "gordongames-v8",
         #"gordongames-v10",
         #"gordongames-v11",
         #"gordongames-v12"
@@ -38,9 +40,6 @@ if __name__=="__main__":
         done = False
         rew = 0
         obs = env.reset()
-        print("Immediate IsPop:", 1)
-        print("Immediate prevskip:", 0)
-        print("Immediate skip:", 0)
         key = ""
         action = "w"
         while key != "q":
@@ -61,6 +60,7 @@ if __name__=="__main__":
             print("Immediate IsPop:", env.controller.is_pop())
             print("Immediate prevskip:", env.controller.prev_skipped)
             print("Immediate skip:", env.controller.skipped)
+            print("Seed:", args["seed"])
             if done:
                 obs = env.reset()
                 print("Immediate IsPop:", 1)

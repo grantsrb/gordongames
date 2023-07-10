@@ -114,6 +114,7 @@ class Controller:
         self.rand = np.random.default_rng(int(time.time()))
         self.n_steps = 0
         self.skipped = 0
+        self.prev_skipped = 0
         self.n_held_outs = n_held_outs
         self.center_signal = center_signal
 
@@ -206,11 +207,14 @@ class Controller:
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
-            "skipped": self.skipped,
+            "skipped": self.prev_skipped,
         }
+        self.prev_skipped = self.skipped
         if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal(center_signal=self.center_signal)
             self.is_animating = False
+            self.prev_skipped = 0
+            self.skipped = 0
         if self.n_steps <= self.n_targs+1:
             grab = 0
             info["n_items"] = self.n_steps-1
@@ -236,6 +240,7 @@ class Controller:
         """
         self.n_steps = 0
         self.skipped = 0
+        self.prev_skipped = 0
         raise NotImplemented
 
 class NavigationTaskController(Controller):
@@ -283,6 +288,7 @@ class NavigationTaskController(Controller):
         )
         self.register.make_signal(center_signal=self.center_signal)
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -362,8 +368,9 @@ class NavigationTaskController(Controller):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
-            "skipped": self.skipped,
+            "skipped": self.prev_skipped,
         }
+        self.prev_skipped = self.skipped
 
         event = self.register.step(direction, grab)
 
@@ -453,6 +460,7 @@ class EvenLineMatchController(Controller):
             sym_distr=self.sym_distr
         )
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -531,6 +539,7 @@ class ClusterMatchController(EvenLineMatchController):
             held_out=held_out
         )
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
     def calculate_reward(self, harsh: bool=False):
@@ -710,6 +719,7 @@ class UnevenLineMatchController(EvenLineMatchController):
             sym_distr=self.sym_distr
         )
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
 class OrthogonalLineMatchController(ClusterMatchController):
@@ -734,6 +744,7 @@ class OrthogonalLineMatchController(ClusterMatchController):
             sym_distr=self.sym_distr
         )
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
 class BriefPresentationController(ClusterMatchController):
@@ -786,12 +797,15 @@ class BriefPresentationController(ClusterMatchController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
-            "skipped": self.skipped,
+            "skipped": self.prev_skipped,
         }
+        self.prev_skipped = self.skipped
         if self.n_steps > self.n_targs and self.is_animating:
             self.register.make_signal(center_signal=self.center_signal)
             self.register.hide_targs()
             self.is_animating = False
+            self.prev_skipped = 0
+            self.skipped = 0
         if self.n_steps <= self.n_targs+1:
             grab = 0
             info["n_items"] = self.n_steps-1
@@ -860,6 +874,7 @@ class NutsInCanController(EvenLineMatchController):
         self.flashed_targs = []
         self.register.draw_register()
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
     def step(self, direction: int, grab: int):
@@ -902,12 +917,12 @@ class NutsInCanController(EvenLineMatchController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
-            "skipped": self.skipped,
+            "skipped": self.prev_skipped,
         }
+        self.prev_skipped = self.skipped
         if self.targ is None:
             if self.skipped:
                 self.n_steps -= 1
-                self.skipped = 0
             else:
                 self.targ = self.invis_targs.pop()
                 self.targ.color = COLORS[TARG]
@@ -915,16 +930,19 @@ class NutsInCanController(EvenLineMatchController):
             self.targ.color = COLORS[DEFAULT]
             if self.skipped:
                 self.n_steps -= 1
-                self.skipped = 0
             else:
                 self.flashed_targs.append(self.targ)
                 self.targ = self.invis_targs.pop()
                 self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
+            self.prev_skipped = 0
+            self.skipped = 0
         event = self.register.step(direction, grab)
-        if self.n_steps <= self.n_targs + 1:
-            info["n_items"] = self.n_steps-1
+        if self.n_steps <= self.n_targs:
+            info["n_items"] = self.n_steps-int(not self.skipped)
+        elif self.n_steps == self.n_targs+1:
+            info["n_items"] = self.n_targs
         done = False
         rew = 0
         if event == BUTTON_PRESS:
@@ -1015,6 +1033,7 @@ class VisNutsController(EvenLineMatchController):
         self.flashed_targs = []
         self.register.draw_register()
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
     def step(self, direction: int, grab: int):
@@ -1057,28 +1076,29 @@ class VisNutsController(EvenLineMatchController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
-            "skipped": self.skipped,
+            "skipped": self.prev_skipped,
         }
+        self.prev_skipped = self.skipped
         if self.targ is None:
             if self.skipped:
                 self.n_steps -= 1
-                self.skipped = 0
             else:
                 self.targ = self.invis_targs.pop()
                 self.targ.color = COLORS[TARG]
         elif len(self.invis_targs) > 0:
             if self.skipped:
                 self.n_steps -= 1
-                self.skipped = 0
             else:
                 self.flashed_targs.append(self.targ)
                 self.targ = self.invis_targs.pop()
                 self.targ.color = COLORS[TARG]
         elif len(self.invis_targs)==0 and self.is_animating:
             self.end_animation()
+            self.prev_skipped = 0
+            self.skipped = 0
         event = self.register.step(direction, grab)
         if self.n_steps <= self.n_targs + 1:
-            info["n_items"] = self.n_steps-1
+            info["n_items"] = self.n_steps-int(not self.skipped)
         done = False
         rew = 0
         if event == BUTTON_PRESS:
@@ -1170,6 +1190,7 @@ class StaticVisNutsController(VisNutsController):
         self.flashed_targs = []
         self.register.draw_register()
         self.skipped = 0
+        self.prev_skipped = 0
         return self.grid.grid
 
 class InvisNController(NutsInCanController):
@@ -1242,8 +1263,9 @@ class InvisNController(NutsInCanController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
-            "skipped": self.skipped,
+            "skipped": self.prev_skipped,
         }
+        self.prev_skipped = self.skipped
 
         # Initial reset frame is blank with n_items equal to n_targs
         # Subsequent frame has signal, player cannot play still. n_items
@@ -1339,8 +1361,9 @@ class VisNController(StaticVisNutsController):
             "disp_targs":int(self.register.display_targs),
             "is_animating":int(self.is_animating),
             "is_pop": int(self.is_pop()),
-            "skipped": self.skipped,
+            "skipped": self.prev_skipped,
         }
+        self.prev_skipped = self.skipped
 
         # Initial reset frame is blank with n_items equal to n_targs
         # Subsequent frame displays all targs and phase signal,
@@ -1348,8 +1371,10 @@ class VisNController(StaticVisNutsController):
         # Next frame, player can play.
         if self.is_animating:
             info["n_items"] = self.n_targs
-            if not self.skipped: self.end_animation()
-            self.skipped = 0
+            if not self.skipped:
+                self.end_animation()
+                self.prev_skipped = 0
+                self.skipped = 0
 
         event = self.register.step(direction, grab)
         done = False
