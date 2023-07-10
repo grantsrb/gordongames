@@ -38,10 +38,13 @@ if __name__=="__main__":
         done = False
         rew = 0
         obs = env.reset()
-        env.render()
+        print("Immediate IsPop:", 1)
+        print("Immediate prevskip:", 0)
+        print("Immediate skip:", 0)
         key = ""
         action = "w"
         while key != "q":
+            env.render()
             key = input("action: ")
             if key   == "w": action = UP
             elif key == "d": action = RIGHT
@@ -55,6 +58,11 @@ if __name__=="__main__":
             print("info")
             for k in info.keys():
                 print("    ", k, ":", info[k])
+            print("Immediate IsPop:", env.controller.is_pop())
+            print("Immediate prevskip:", env.controller.prev_skipped)
+            print("Immediate skip:", env.controller.skipped)
             if done:
                 obs = env.reset()
-            env.render()
+                print("Immediate IsPop:", 1)
+                print("Immediate prevskip:", 0)
+                print("Immediate skip:", 0)
