@@ -143,7 +143,7 @@ class Grid:
           grid: ndarry (H,W)
             a numpy array representing the grid
         """
-        self._grid = np.zeros(self.pixel_shape).astype(np.float)
+        self._grid = np.zeros(self.pixel_shape).astype(float)
         self._grid = self._grid + COLORS[DEFAULT]
         if do_divide:
             self.draw_divider()
@@ -255,7 +255,7 @@ class Grid:
         
         # Make unit
         unit = np.zeros((self.density, self.density)) + COLORS[DEFAULT]
-        unit = unit.astype(np.float)
+        unit = unit.astype(float)
         draw_space = max(self.density-1, 1)
         unit[0:draw_space, 0:draw_space] = color
         # Tile the unit
