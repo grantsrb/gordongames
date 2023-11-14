@@ -54,3 +54,11 @@ register(
     id='gordongames-v12',
     entry_point='gordongames.envs:VisN',
 )
+register(
+    id='gordongames-v13',
+    entry_point='gordongames.envs:NutsInCan',
+)
+register(
+    id='gordongames-v14',
+    entry_point='gordongames.envs:VisNuts',
+)

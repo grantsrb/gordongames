@@ -285,6 +285,36 @@ def nuts_in_can(contr):
         grab = player.coord==reg.button.coord
     return direction, grab
 
+def nonnumeric_nuts_in_can(contr):
+    """
+    Takes a register and finds the optimal movement and grab action
+    for the state of the register in the nuts in a can game if the
+    player completely ignored the quantity everytime.
+    The optimal policy simply outputs STAY during
+    the demonstration phase, and then navigates to the end button and
+    presses it during the response phase. The actions are the same
+    regardless of the initial display.
+
+    Args:
+        contr: Controller
+    Returns:
+        direction: int
+            a directional movement
+        grab: int
+            whether or not to grab
+    """
+    reg = contr.register
+    player = reg.player
+    items = reg.items
+    n_targs = reg.n_targs
+
+    if contr.is_animating and reg.player.coord == reg.pile.coord:
+        return STAY, 0
+
+    direction=get_direction(player.coord,reg.button.coord,reg.rand)
+    grab = player.coord==reg.button.coord
+    return direction, grab
+
 def rev_cluster_match(contr):
     """
     Takes a register and finds the optimal movement and grab action
