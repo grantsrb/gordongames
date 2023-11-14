@@ -12,7 +12,7 @@ try:
     import matplotlib.pyplot as plt
     import matplotlib
 except ImportError as e:
-    raise error.DependencyNotInstalled("{}. (HINT: see matplotlib documentation for installation https://matplotlib.org/faq/installing_faq.html#installation".format(e))
+    raise OSError.DependencyNotInstalled("{}. (HINT: see matplotlib documentation for installation https://matplotlib.org/faq/installing_faq.html#installation".format(e))
 
 class GordonGame(gym.Env):
     """
