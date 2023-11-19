@@ -126,6 +126,12 @@ Use `gym.make('gordongames-v11')` to create the Give N game. This game never dis
 #### Environment v12 Vis N
 Use `gym.make('gordongames-v12')` to create the Vis N game. This is the same as the Give N variant except that the targets are visible and displayed on the first frame. This is also the same as the Static Visible Nuts-in-Can game except that the animation phase ends on the first frame.
 
+#### Environment v13 Non-Numeric Nuts in Can
+Use `gym.make('gordongames-v13')` to create the this variant. This is the same as the Nuts in a Can variant except that the optimal actions are to press the button whenever a new item appears in the demonstration phase and then to navigate directly to the ending button at the onset of the response phase. 
+
+#### Environment v14 Non-Numeric Visible Nuts in Can
+Use `gym.make('gordongames-v14')` to create the this variant. This is the same as the Visible Nuts in a Can variant except that the optimal actions are to press the button whenever a new item appears in the demonstration phase and then to navigate directly to the ending button at the onset of the response phase. 
+
 
 ## Game Details
 Each game consists of a randomly intitialized grid with various objects distributed on the grid depending on the game type. The goal is for the agent to first complete some task and then press the end button located in the upper right corner of the grid. Episodes last until the agent presses the end button. The agent can move left, up, right, down, or stay still. The agent also has the ability to interact with objects via the grab action. Grab only acts on objects in the same square as the agent. If the object is an "item", the agent carries the item to wherever it moves on that step. If the object is a "pile", a new item is created and carried with the agent for that step. The ending button is pressed using the grab action. The reward is only granted at the end of each episode if the task was completed successfully.
