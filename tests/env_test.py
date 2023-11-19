@@ -10,12 +10,12 @@ import time
 if __name__=="__main__":
     render = True
     save_figs = False
-    n_episodes = 100
+    n_episodes = 10
     delay = 1
     held_out = False
 
     kwargs = {
-        "targ_range": (2,3),
+        "targ_range": (2,8),
         "hold_outs": {},
         "grid_size": (10,10),
         "pixel_density": 1,
@@ -25,7 +25,7 @@ if __name__=="__main__":
         "rand_pdb": False,
         "player_on_pile": True,
         "rand_timing": True,
-        "timing_p": 0.85,
+        "timing_p": 0.65, #0.85,
         "spacing_limit": 2,
         "sym_distr": True,
         "min_play_area": True,
@@ -37,15 +37,17 @@ if __name__=="__main__":
         #"gordongames-v1",
         #"gordongames-v2",
         #"gordongames-v3",
-        "gordongames-v4",
+        #"gordongames-v4",
         #"gordongames-v5",
         #"gordongames-v6",
         #"gordongames-v7",
-        "gordongames-v8",
+        #"gordongames-v8",
         #"gordongames-v9",
         #"gordongames-v10",
         #"gordongames-v11",
         #"gordongames-v12",
+        "gordongames-v13",
+        "gordongames-v14",
     ]
     start_time = time.time()
     for env_name in env_names:
