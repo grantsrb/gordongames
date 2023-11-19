@@ -309,6 +309,8 @@ def nonnumeric_nuts_in_can(contr):
     n_targs = reg.n_targs
 
     if contr.is_animating and reg.player.coord == reg.pile.coord:
+        if not contr.prev_skipped: # press button when new items appear
+            return STAY, 1
         return STAY, 0
 
     direction=get_direction(player.coord,reg.button.coord,reg.rand)
